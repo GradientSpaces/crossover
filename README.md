@@ -26,7 +26,7 @@
 
 <p align="center">
   <a href="">
-    <img src="https://github.com/sayands/crossover/blob/main/docs/static/videos/teaser.gif" width="100%">
+    <img src="https://github.com/sayands/crossover/blob/main/static/videos/teaser.gif" width="100%">
   </a>
 </p>
 
