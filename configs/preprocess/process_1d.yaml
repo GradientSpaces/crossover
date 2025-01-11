@@ -1,0 +1,58 @@
+name: "PreProcess3D"
+
+base_dir : "/drive/dumps/multimodal-spaces"
+exp_dir  : ""
+  
+data:
+  sources: []
+  process_dir: ${base_dir}/preprocess_feats
+  Scannet:
+    base_dir       : /drive/datasets/Scannet/
+    shape_dir      : /drive/datasets/Shapenet/ShapeNetCore.v2/
+    process_dir    : ${data.process_dir}/Scannet/
+    processor1D    : Scannet1DProcessor
+    processor3D    : Scannet3DProcessor
+    mesh_subfix    : _vh_clean_2.labels.ply
+    seg_subfix     : _vh_clean_2.0.010000.segs.json
+    aggre_subfix   : _vh_clean.aggregation.json
+  
+  Scan3R:
+    base_dir       : /drive/datasets/Scan3R/
+    process_dir    : ${data.process_dir}/Scan3R/
+    processor3D    : Scan3R3DProcessor
+    processor2D    : Scan3R2DProcessor
+    processor1D    : Scan3R1DProcessor
+    label_filename : labels.instances.align.annotated.v2.ply
+    skip_frames    : 1
+
+  Shapenet:
+    base_dir       : /drive/datasets/Shapenet/ShapeNetCore.v2/
+
+modality_info:
+  1D  :
+    feature_extractor: 
+      embed_dim : 768
+      model_url : 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large.pth'
+  
+  2D  :
+    feature_extractor:
+      model     : DinoV2
+      ckpt      : dinov2_vitg14
+      embed_dim : 1536
+  
+  3D  :
+    feature_extractor:
+      model      : I2PMAE
+      ckpt       : /drive/pretrained-models/pointbind_i2pmae.pt 
+      embed_dim  : 384
+    
+    voxel_size : 0.05
+    max_points_per_object : 1024
+    min_points_per_object : 50
+
+# 'Preprocess' / 'ObjectLevelTrain', 'SceneLevelTrain', 'UnifiedTrain1D', 'UnifiedTrain2D', 'UnifiedTrain3D'
+task: 
+  name       : Preprocess 
+  Preprocess :
+    modality : '1D'
+    splits   : ['train', 'val']

@@ -1,0 +1,124 @@
+name: "MMTrain"
+rng_seed        : 42
+num_gpu         : 1
+base_dir        : "/drive/dumps/multimodal-spaces/"
+exp_dir         : ""
+mode            : "train"
+naming_keywords : ['task', 'time']
+
+resume : False
+
+logger :
+  name : "wandb"
+  entity : "multimodal-spaces"
+
+  
+data :
+  sources     : ['Scannet']
+  process_dir : ${base_dir}/preprocess_feats
+  
+  Scannet:
+    base_dir         : /drive/datasets/Scannet
+    shape_dir        : /drive/datasets/Shapenet/ShapeNetCore.v2
+    process_dir      : ${data.process_dir}/Scannet
+    chunked_dir      : ${data.process_dir}/objects_chunked/Scannet
+    processor1D      : Scannet1DProcessor
+    processor2D      : Scannet2DProcessor
+    processor3D      : Scannet3DProcessor
+    mesh_subfix      : _vh_clean_2.labels.ply
+    seg_subfix       : _vh_clean_2.0.010000.segs.json
+    aggre_subfix     : _vh_clean.aggregation.json
+    avail_modalities : ['point', 'cad', 'rgb', 'referral']
+    max_object_len   : 80
+    voxel_size       : 0.02
+  
+  Scan3R:
+    base_dir       : /drive/datasets/Scan3R/
+    process_dir    : ${data.process_dir}/Scan3R/
+    chunked_dir      : ${data.process_dir}/objects_chunked/Scan3R
+    processor3D    : Scan3R3DProcessor
+    processor2D    : Scan3R2DProcessor
+    processor1D    : Scan3R1DProcessor
+    label_filename : labels.instances.align.annotated.v2.ply
+    avail_modalities : ['point', 'cad', 'rgb', 'referral']
+    max_object_len : 80
+    voxel_size     : 0.02
+
+  Shapenet:
+    base_dir       : /drive/datasets/Shapenet/ShapeNetCore.v2
+
+modality_info:
+  1D  :
+    feature_extractor: 
+      model     : LongCLIP
+      ckpt      : /drive/pretrained-models/longclip-L.pt
+      embed_dim : 768
+  
+  2D  :
+    feature_extractor:
+      model     : DinoV2
+      ckpt      : dinov2_vitg14
+      embed_dim : 1536
+  
+  3D  :
+    feature_extractor:
+      model      : I2PMAE
+      ckpt       : /drive/pretrained-models/pointbind_i2pmae.pt 
+      embed_dim  : 384
+    
+    voxel_size : 0.05
+    max_points_per_object : 1024
+    min_points_per_object : 50
+
+# 'Preprocess', 'PreprocessMultimodal' 'ObjectLevelTrain', 'SceneLevelTrain', 'UnifiedTrain1D', 'UnifiedTrain2D', 'UnifiedTrain3D'
+task: 
+  name       : ObjectLevelGrounding 
+  ObjectLevelGrounding :
+    modalities  : ['rgb', 'point', 'cad', 'referral']
+    train       : [ScannetObject, Scan3RObject]
+    val         : [ScannetObject, Scan3RObject]
+
+trainer: GroundingTrainer
+
+model:
+  name: ObjectLevelEncoder
+  point:
+    embed_dim : 384
+  cad:
+    embed_dim : 384
+  image:
+    embed_dim : 1536
+  referral:
+    embed_dim : 768
+
+  out_dim       : 768
+  loss          : ObjectWiseContrastiveLoss
+  base_modality : 'rgb'
+
+dataloader:
+  batch_size  : 64
+  num_workers : 0
+
+eval:
+  train:
+    name: GroundingEval
+  val:
+    name: GroundingEval
+  save: False
+
+solver:
+  gradient_accumulation_steps: 1
+  epochs_per_save: 20
+  epochs_per_eval: 1
+  lr: 1e-3
+  grad_norm: 5.0
+  epochs: 150
+  optim:
+    name: 'AdamW'
+    args:
+      betas: [0.9, 0.98]
+  sched:
+    name: 'warmup_cosine'
+    args:
+      warmup_steps: 200
+      minimum_ratio: 0.1

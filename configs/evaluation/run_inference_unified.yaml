@@ -1,0 +1,121 @@
+name: "MMTrain"
+rng_seed        : 42
+num_gpu         : 1
+base_dir        : "/drive/dumps/multimodal-spaces/"
+exp_dir         : ""
+mode            : "train"
+naming_keywords : ['task', 'time']
+
+resume : False
+
+logger :
+  name : "wandb"
+  entity : "multimodal-spaces"
+
+  
+data :
+  sources     : ['Scannet']
+  process_dir : ${base_dir}/preprocess_feats
+  
+  Scannet:
+    base_dir         : /drive/datasets/Scannet
+    shape_dir        : /drive/datasets/Shapenet/ShapeNetCore.v2
+    process_dir      : ${data.process_dir}/Scannet
+    chunked_dir      : ${data.process_dir}/objects_chunked/Scannet
+    processor1D      : Scannet1DProcessor
+    processor2D      : Scannet2DProcessor
+    processor3D      : Scannet3DProcessor
+    mesh_subfix      : _vh_clean_2.labels.ply
+    seg_subfix       : _vh_clean_2.0.010000.segs.json
+    aggre_subfix     : _vh_clean.aggregation.json
+    avail_modalities : ['point', 'cad', 'rgb', 'referral']
+    max_object_len   : 80
+    voxel_size       : 0.02
+  
+  Scan3R:
+    base_dir       : /drive/datasets/Scan3R/
+    process_dir    : ${data.process_dir}/Scan3R/
+    processor3D    : Scan3R3DProcessor
+    processor2D    : Scan3R2DProcessor
+    processor1D    : Scan3R1DProcessor
+    label_filename : labels.instances.align.annotated.v2.ply
+    avail_modalities : ['point', 'cad', 'rgb', 'referral']
+    max_object_len : 80
+    voxel_size     : 0.02
+  
+  Front3D:
+    base_dir       : /drive/datasets/3D-Front-rendered/
+    process_dir    : ${data.process_dir}/Front3D/
+    processor3D    : FrontD3DProcessor
+    processor2D    : FrontD2DProcessor
+    avail_modalities : ['point', 'cad', 'rgb', 'referral']
+    max_object_len : 80
+    voxel_size     : 0.02
+    skip_frames    : 1
+
+  Shapenet:
+    base_dir       : /drive/datasets/Shapenet/ShapeNetCore.v2
+
+modality_info:
+  1D  :
+    feature_extractor: 
+      model     : LongCLIP
+      ckpt      : /drive/pretrained-models/longclip-L.pt
+      embed_dim : 768
+  
+  2D  :
+    feature_extractor:
+      model     : DinoV2
+      ckpt      : dinov2_vitg14
+      embed_dim : 1536
+  
+  3D  :
+    feature_extractor:
+      model      : I2PMAE
+      ckpt       : /drive/pretrained-models/pointbind_i2pmae.pt 
+      embed_dim  : 384
+    
+    voxel_size : 0.05
+    max_points_per_object : 1024
+    min_points_per_object : 50
+
+# 'Preprocess', 'PreprocessMultimodal' 
+# 'SceneLevelGrounding', 'ObjectLevelGrounding', 'UnifiedTrain1D', 'UnifiedTrain2D', 'UnifiedTrain3D', 
+# 'Inference'
+
+task: 
+  name       : InferenceSceneRetrieval
+  InferenceSceneRetrieval:
+    # train                   : [Scannet]
+    val                     : [Scan3R]
+    modalities              : ['rgb', 'point', 'cad', 'referral']
+    scene_modalities        : ['rgb', 'point', 'referral', 'floorplan'] #, 'point']
+    ckpt_path               : /drive/dumps/multimodal-spaces/runs/UnifiedTrain_Scannet+Scan3R/2024-11-25-09:39:36.503748/ckpt/best.pth
+    
+    # Scannet + Scan3R (all align): /drive/dumps/multimodal-spaces/runs/UnifiedTrain_Scannet+Scan3R/2024-11-25-11:50:04.417406/ckpt/best.pth
+    # Scannet + Scan3R: /drive/dumps/multimodal-spaces/runs/UnifiedTrain_Scannet+Scan3R/2024-11-05-23:55:39.053436/ckpt/best.pth/
+
+inference_module: SceneRetrieval
+model: 
+  name: UnifiedEncoder
+  point:
+    embed_dim : 384
+  cad:
+    embed_dim : 384
+  image:
+    embed_dim : 1536
+  referral:
+    embed_dim : 768
+
+  # Only For Unified Encoder
+  encoder1D:
+    input_dim : 768
+  encoder2D :
+    input_dim : 1536
+  encoder3D:
+    input_dim : 512
+  out_dim       : 768
+
+dataloader:
+  batch_size  : 16
+  num_workers : 6

@@ -1,0 +1,78 @@
+name: "PreProcess3D"
+
+base_dir : "/drive/dumps/multimodal-spaces"
+exp_dir  : ""
+  
+data:
+  sources: []
+  process_dir: ${base_dir}/preprocess_feats
+  Scannet:
+    base_dir       : /drive/datasets/Scannet/
+    shape_dir      : /drive/datasets/Shapenet/ShapeNetCore.v2/
+    layout_dir     : /drive/datasets/SceneCAD/
+    process_dir    : ${data.process_dir}/Scannet/
+    processor2D    : Scannet2DProcessor
+    processor3D    : Scannet3DProcessor
+    mesh_subfix    : _vh_clean_2.labels.ply
+    seg_subfix     : _vh_clean_2.0.010000.segs.json
+    aggre_subfix   : _vh_clean.aggregation.json
+    skip_frames    : 5
+  
+  Scan3R:
+    base_dir       : /drive/datasets/Scan3R/
+    process_dir    : ${data.process_dir}/Scan3R/
+    processor3D    : Scan3R3DProcessor
+    processor2D    : Scan3R2DProcessor
+    processor1D    : Scan3R1DProcessor
+    label_filename : labels.instances.align.annotated.v2.ply
+    skip_frames    : 1
+  
+  Front3D:
+    base_dir       : /drive/datasets/3D-Front-rendered/
+    process_dir    : ${data.process_dir}/Front3D/
+    processor3D    : FrontD3DProcessor
+    processor2D    : FrontD2DProcessor
+    max_object_len : 80
+    voxel_size     : 0.02
+    skip_frames    : 1
+
+  Shapenet:
+    base_dir       : /drive/datasets/Shapenet/ShapeNetCore.v2/
+
+modality_info:
+  1D  :
+    1D  :
+      feature_extractor: 
+        model     : LongCLIP
+        ckpt      : /drive/pretrained-models/longclip-L.pt
+        embed_dim : 768
+  
+  2D  :
+    feature_extractor:
+      model     : DinoV2
+      ckpt      : dinov2_vitg14
+      embed_dim : 1536
+    
+    image:
+      orig_size  : [480, 640]
+      model_size : [224, 224]
+      num_levels : 3
+      top_k      : 10
+
+  
+  3D  :
+    feature_extractor:
+      model      : I2PMAE
+      ckpt       : /drive/pretrained-models/pointbind_i2pmae.pt 
+      embed_dim  : 384
+    
+    voxel_size : 0.05
+    max_points_per_object : 1024
+    min_points_per_object : 50
+
+# 'Preprocess' / 'ObjectLevelTrain', 'SceneLevelTrain', 'UnifiedTrain1D', 'UnifiedTrain2D', 'UnifiedTrain3D'
+task: 
+  name       : Preprocess 
+  Preprocess :
+    modality : '2D'
+    splits   : ['train', 'val']

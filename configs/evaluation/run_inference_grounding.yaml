@@ -1,0 +1,124 @@
+name: "MMTrain"
+rng_seed        : 42
+num_gpu         : 1
+base_dir        : "/drive/dumps/multimodal-spaces/"
+exp_dir         : ""
+mode            : "train"
+naming_keywords : ['task', 'time']
+
+resume : False
+
+logger :
+  name : "wandb"
+  entity : "multimodal-spaces"
+
+  
+data :
+  sources     : ['Scannet']
+  process_dir : ${base_dir}/preprocess_feats
+  
+  Scannet:
+    base_dir         : /drive/datasets/Scannet
+    shape_dir        : /drive/datasets/Shapenet/ShapeNetCore.v2
+    process_dir      : ${data.process_dir}/Scannet
+    chunked_dir      : ${data.process_dir}/objects_chunked/Scannet
+    processor1D      : Scannet1DProcessor
+    processor2D      : Scannet2DProcessor
+    processor3D      : Scannet3DProcessor
+    mesh_subfix      : _vh_clean_2.labels.ply
+    seg_subfix       : _vh_clean_2.0.010000.segs.json
+    aggre_subfix     : _vh_clean.aggregation.json
+    avail_modalities : ['point', 'cad', 'rgb', 'referral']
+    max_object_len   : 80
+    voxel_size       : 0.02
+  
+  Scan3R:
+    base_dir       : /drive/datasets/Scan3R/
+    process_dir    : ${data.process_dir}/Scan3R/
+    processor3D    : Scan3R3DProcessor
+    processor2D    : Scan3R2DProcessor
+    processor1D    : Scan3R1DProcessor
+    label_filename : labels.instances.align.annotated.v2.ply
+    avail_modalities : ['point', 'cad', 'rgb', 'referral']
+    max_object_len : 80
+    voxel_size     : 0.02
+
+  Shapenet:
+    base_dir       : /drive/datasets/Shapenet/ShapeNetCore.v2
+
+modality_info:
+  1D  :
+    feature_extractor: 
+      model     : LongCLIP
+      ckpt      : /drive/pretrained-models/longclip-L.pt
+      embed_dim : 768
+  
+  2D  :
+    feature_extractor:
+      model     : DinoV2
+      ckpt      : dinov2_vitg14
+      embed_dim : 1536
+  
+  3D  :
+    feature_extractor:
+      model      : I2PMAE
+      ckpt       : /drive/pretrained-models/pointbind_i2pmae.pt 
+      embed_dim  : 384
+    
+    max_points_per_object : 1024
+    min_points_per_object : 50
+
+# 'Preprocess', 'PreprocessMultimodal' 
+# 'SceneLevelGrounding', 'ObjectLevelGrounding', 'UnifiedTrain1D', 'UnifiedTrain2D', 'UnifiedTrain3D', 
+# 'Inference'
+
+task: 
+  # name       : InferenceObjectRetrieval
+  # InferenceObjectRetrieval:
+  #   val                     : [Scannet]
+  #   modalities              : ['rgb', 'point', 'cad', 'referral']
+  #   scene_modalities        : ['rgb', 'point']
+  #   ckpt_path               : /drive/dumps/multimodal-spaces/runs/ObjectLevelGrounding_ScannetObject/2024-10-24-07:49:05.462448/ckpt/best.pth/
+    
+  name       : InferenceObjectRetrieval
+  InferenceObjectRetrieval:
+    val                     : [Scannet]
+    modalities              : ['rgb', 'point', 'cad', 'referral']
+    scene_modalities        : ['rgb', 'point', 'referral', 'floorplan']
+    ckpt_path               : /drive/dumps/multimodal-spaces/runs/ObjectLevelGrounding_ScannetObject+Scan3RObject/2024-11-06-19:01:49.664041/ckpt/best.pth/
+    
+    # All PairWise - /drive/dumps/multimodal-spaces/runs/SceneLevelGrounding_Scan3R+Scannet/2024-11-18-17:30:52.293851/ckpt/best.pth/
+    # Object Grounding - /drive/dumps/multimodal-spaces/runs/ObjectLevelGrounding_ScannetObject+Scan3RObject/2024-11-06-19:01:49.664041/ckpt/best.pth/
+    # Scannet + Scan3R - /drive/dumps/multimodal-spaces/runs/SceneLevelGrounding_Scannet+Scan3R/2024-11-05-19:16:23.686900/ckpt/best.pth
+    # Scannet - /drive/dumps/multimodal-spaces/runs/SceneLevelGrounding_Scannet/2024-11-05-19:17:48.229838/ckpt/best.pth/
+    # Scan3R - /drive/dumps/multimodal-spaces/runs/SceneLevelGrounding_Scan3R/2024-11-05-19:19:02.866359/ckpt/best.pth/
+    
+
+inference_module: ObjectRetrieval
+
+model: 
+  name: ObjectLevelEncoder
+  # name: SceneLevelEncoder
+  point:
+    embed_dim : 384
+  cad:
+    embed_dim : 384
+  image:
+    embed_dim : 1536
+  referral:
+    embed_dim : 768
+
+  # Only For Unified Encoder
+  encoder1D:
+    input_dim : 768
+  encoder2D :
+    input_dim : 1536
+  encoder3D:
+    input_channels : 3
+    d_model        : 512
+    conv_layers    : [16, 32, 64, 128, 256]
+  out_dim       : 768
+
+dataloader:
+  batch_size  : 1
+  num_workers : 4
