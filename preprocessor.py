@@ -1,6 +1,7 @@
 from common import misc
 from preprocess import build
 
+from omegaconf import OmegaConf
 import hydra
 import logging as log
 
@@ -10,7 +11,7 @@ log.basicConfig(level=log.INFO,
                 datefmt='%Y-%m-%d %H:%M:%S')
 
 @hydra.main(version_base=None, config_path="./configs", config_name="default")
-def main(cfg): 
+def main(cfg: OmegaConf) -> None:
     datasets = misc.rgetattr(cfg, "data.sources")
     
     task_name = misc.rgetattr(cfg, "task.name")

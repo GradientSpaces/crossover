@@ -1,12 +1,10 @@
-# Dataset Preprocessing
+# Dataset Preparation
 
 ## Overview
 
 This document provides instructions for pre-processing different datasets, including 
 - ScanNet
 - 3RScan
-
-One can also use the provided code as a reference for pre-processing your customized dataset.
 
 ## Prerequisites
 
@@ -18,8 +16,12 @@ Before you begin, simply activate the `crossover` conda environment.
 
 - **3RScan**: Download 3RScan dataset from the [official website](https://github.com/WaldJohannaU/3RScan).
 
+- **ShapeNet**: Download Shapenet dataset from the [official website](https://shapenet.org/).
+
+> You only need to download ShapeNet dataset if you are running our preprocessing script(s), training + evaluation directly uses our provided preprocessed data.
+
 ### Download Referral and CAD annotations
-We use [SceneVerse](https://scene-verse.github.io/) for instance referrals (ScanNet & 3RScan) and [Scan2CAD](https://github.com/skanti/Scan2CAD) for CAD annotations (ScanNet). We currently host all data on G-Drive (refer to README.md in the root directory of the repo for access). Exact instructions for data setup below.
+We use [SceneVerse](https://scene-verse.github.io/) for instance referrals (ScanNet & 3RScan) and [Scan2CAD](https://github.com/skanti/Scan2CAD) for CAD annotations (ScanNet). We currently host all data on Redivis (refer to README.md in the root directory of the repo for access). Exact instructions for data setup below.
 
 #### ScanNet
 1. Run the following to extract ScanNet data 
@@ -29,7 +31,7 @@ python preprocess_2d_scannet.py --scannet_path PATH_TO_SCANNET --output_path PAT
 python unzip_scannet.py --scannet_path PATH_TO_SCANNET --output_path PATH_TO_SCANNET
 ```
 
-2. Download `files/` under `ScanNet/` from G-Drive and place under `PATH_TO_SCANNET/`.
+2. Download `files/` under `meta_data/ScanNet/` from Redivis and place under `PATH_TO_SCANNET/`.
 
 Once completed, the data structure would look like the following:
 
@@ -47,7 +49,7 @@ ScanNet/
 |   |   ├── scene0000_00_vh_clean_2.labels.ply
 |   |   ├── scene0000_00_vh_clean_2.0.010000.segs.json
 |   |   ├── scene0000_00_vh_clean.aggregation.json
-|   |   ├── scene0000_00_2d-instance-filt.zip
+|   |   └── scene0000_00_2d-instance-filt.zip
 |   └── ...
 └── files
     ├── scannetv2_val.txt
@@ -63,7 +65,7 @@ For clarity, We provide the script `scannet_objectdata.py` to generate `files/ob
 
 #### 3RScan
 
-1. Download `files/` under `Scan3R/` from G-Drive and place under `PATH_TO_SCAN3R/`.
+1. Download `files/` under `meta_data/Scan3R/` from Redivis and place under `PATH_TO_SCAN3R/`.
 
 2. Run the following to align the re-scans and reference scans in the same coordinate system & unzip `sequence.zip` for every scan:
 

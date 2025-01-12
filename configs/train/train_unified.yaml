@@ -88,9 +88,6 @@ task:
     val              : [Scannet, Scan3R]
     object_enc_ckpt  : /drive/dumps/multimodal-spaces/runs/SceneLevelGrounding_Scannet+Scan3R/2024-11-05-19:16:23.686900/ckpt/best.pth
     
-    # Scannet+Scan3R: /drive/dumps/multimodal-spaces/runs/SceneLevelGrounding_Scannet+Scan3R/2024-11-05-19:16:23.686900/ckpt/best.pth
-    # Scannet: /drive/dumps/multimodal-spaces/runs/SceneLevelGrounding_Scannet/2024-10-27-12:50:58.956426/ckpt/best.pth
-    
 trainer: UnifiedTrainer
 
 model:

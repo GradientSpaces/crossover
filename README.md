@@ -67,7 +67,7 @@ assume complete data availability across all modalities. We present **CrossOver*
 </details>
 
 # :arrow_down: Data Download
-We currently host the required preprocessed data + meta-data on Redivis and request all applicants to fill out the form [here](). We also release instructions for data download & preparation with scripts for ScanNet + 3RScan. For detailed instructions, please look at `README.MD` in `prepare_data/` directory/.
+We currently host the required preprocessed data + meta-data on Redivis and request all applicants to fill out the form [here](). We also release instructions for data download & preparation with scripts for ScanNet + 3RScan. For detailed instructions, please look at `README.MD` in `data_prepare/` directory.
 
 > Note: You agree to the terms of ScanNet, 3RScan, ShapeNet, Scan2CAD and SceneVerse datasets by downloading our hosted data.
 
@@ -88,6 +88,7 @@ Clone the repo and setup as follows:
 git clone git@github.com:GradientSpaces/CrossOver.git
 cd CrossOver
 conda env create -f req.yml
+conda activate crossover
 ```
 
 # :wrench: Data Preprocessing
@@ -98,6 +99,45 @@ Please refer to `PREPROCESS.MD` for details.
 # :film_projector: Demo
 
 # :weight_lifting: Training 
+Once the environment `crossover` is setup and activated, change `config_path` in the corresponding bash file.
+
+#### Train Instance Baseline
+Adjust path parameters in `configs/train/train_object_level.yaml` and run the following:
+
+```bash
+bash scripts/train/train_instance_baseline.sh
+```
+
+#### Train Instance Retrieval Pipeline
+Adjust path parameters in `configs/train/train_scene_level.yaml` and run the following:
+
+```bash
+bash scripts/train/train_instance_crossover.sh
+```
+
+#### Train Scene Retrieval Pipeline
+Adjust path parameters in `configs/train/train_unified.yaml` and run the following:
+
+```bash
+bash scripts/train/train_scene_crossover.sh
+```
+
+> The scene retrieval pipeline uses the trained weights from instance retrieval pipeline (for object feature calculation), please ensure to update `task:UnifiedTrain:object_enc_ckpt` in the config file.
+
+#### Checkpoints
+We provide all available checkpoints on G-Drive [here](). Here we provide detailed descriptions of checkpoint in the table below:
+
+| Setting                | Description                                    | Checkpoint          |
+| ---------------------- | ---------------------------------------------- | ------------------- |
+| ``instance_baseline``  | Instance Baseline trained on ScanNet           |  [ScanNet]()        | 
+| ``instance_baseline``  | Instance Baseline trained on ScanNet + Scan3R  |  [ScanNet+Scan3R]() |
+| ``instance_crossover`` | Instance CrossOver trained on ScanNet          |  [ScanNet]()        | 
+| ``instance_crossover`` | Instance CrossOver trained on Scan3R           |  [Scan3R]()         |
+| ``instance_crossover`` | Instance CrossOver trained on ScanNet + Scan3R |  [ScanNet+Scan3R]() |
+| ``scene_crossover``    | Unified CrossOver trained on ScanNet           |  [ScanNet]()        |
+| ``scene_crossover``    | Unified CrossOver trained on ScanNet + Scan3R  |  [ScanNet+Scan3R]() |
+
+
 
 # :bar_chart: Evaluation
 
