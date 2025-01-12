@@ -2,10 +2,12 @@ import os.path as osp
 import open3d as o3d
 import numpy as np
 import torch
+from tqdm import tqdm
 from omegaconf import DictConfig
+from typing import Any, Dict
 
 from common import load_utils 
-from utils import scan3r
+from utils import point_cloud, scan3r
 
 from preprocess.build import PROCESSOR_REGISTRY
 from preprocess.feat3D.base import Base3DProcessor
@@ -17,6 +19,9 @@ class Scan3R3DProcessor(Base3DProcessor):
     """
 
     def __init__(self, config_data: DictConfig, config_3D: DictConfig, split: str) -> None:
+        """
+        Initializes the Scan3R3DProcessor.
+        """
         self.data_dir = config_data.base_dir
         
         files_dir = osp.join(config_data.base_dir, 'files')
@@ -24,15 +29,28 @@ class Scan3R3DProcessor(Base3DProcessor):
         self.scan_ids = []
         self.scan_ids = scan3r.get_scan_ids(files_dir, split)
         
-        self.out_dir = config_data.process_dir
+        self.out_dir = osp.join(config_data.process_dir, 'scans')
         load_utils.ensure_dir(self.out_dir)
         
         self.label_filename = config_data.label_filename
         self.undefined = 0
         
         self.objects = load_utils.load_json(osp.join(files_dir, 'objects.json'))['scans']
+        
+        # get device 
+        if not torch.cuda.is_available(): 
+            raise RuntimeError('No CUDA devices available.')
+        self.device = torch.device("cuda")
+        
+        self.config_3D = config_3D
+        
+        # load feature extractor
+        self.feature_extractor = self.loadFeatureExtractor(config_3D, "3D")
     
     def compute3DFeaturesEachScan(self, scan_id: str) -> None:
+        """
+        Computes 3D features for a single scan.
+        """
         ply_data = scan3r.load_ply_data(osp.join(self.data_dir, 'scans'), scan_id, self.label_filename)
         mesh_points = np.stack([ply_data['x'], ply_data['y'], ply_data['z']]).transpose((1, 0))
         

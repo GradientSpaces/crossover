@@ -19,7 +19,7 @@ class Scan3R1DProcessor(Base1DProcessor):
         self.scan_ids = []
         self.scan_ids = scan3r.get_scan_ids(files_dir, split)
         
-        self.out_dir = config_data.process_dir
+        self.out_dir = osp.join(config_data.process_dir, 'scans')
         load_utils.ensure_dir(self.out_dir)
         
         self.objects = load_utils.load_json(osp.join(files_dir, 'objects.json'))['scans']

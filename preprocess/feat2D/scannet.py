@@ -29,7 +29,7 @@ class Scannet2DProcessor(Base2DProcessor):
         self.scan_ids = []
         self.scan_ids = scannet.get_scan_ids(files_dir, split)
         
-        self.out_dir = config_data.process_dir
+        self.out_dir = osp.join(config_data.process_dir, 'scans')
         load_utils.ensure_dir(self.out_dir)
         
         self.orig_image_size = config_2D.image.orig_size

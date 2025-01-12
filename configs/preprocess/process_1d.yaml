@@ -5,7 +5,7 @@ exp_dir  : ""
   
 data:
   sources: []
-  process_dir: ${base_dir}/preprocess_feats
+  process_dir: ${base_dir}/
   Scannet:
     base_dir       : /drive/datasets/Scannet/
     shape_dir      : /drive/datasets/Shapenet/ShapeNetCore.v2/

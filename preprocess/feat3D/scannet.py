@@ -12,13 +12,8 @@ from preprocess.feat3D.base import Base3DProcessor
 
 @PROCESSOR_REGISTRY.register()
 class Scannet3DProcessor(Base3DProcessor):
-    """
-    Scannet3DProcessor processes 3D scan data from the Scannet dataset.
-    """
+    """Scannet 3D (Point Cloud/CAD) feature processor class."""
     def __init__(self, config_data: DictConfig, config_3D: DictConfig, split: str) -> None:
-        """
-        Initializes the Scannet3DProcessor
-        """
         self.data_dir = config_data.base_dir
         files_dir = osp.join(config_data.base_dir, 'files')
         
@@ -29,7 +24,7 @@ class Scannet3DProcessor(Base3DProcessor):
         self.shape_dir = config_data.shape_dir
         self.shape_annot = load_utils.load_json(osp.join(files_dir, 'scan2cad_full_annotations.json')) 
         
-        self.out_dir = config_data.process_dir
+        self.out_dir = osp.join(config_data.process_dir, 'scans')
         load_utils.ensure_dir(self.out_dir)
         
         self.load_files = {}
@@ -96,7 +91,7 @@ class Scannet3DProcessor(Base3DProcessor):
                 shape_annot_instance = shape_annot_to_instance_map[instance_id]
                 object_cad_pcl = shape_annot_instance['points']
                 object_cad_embeddings[instance_id] = self.normalizeObjectPCLAndExtractFeats(object_cad_pcl)
-                
+            
         data3D = {}    
         data3D['objects'] = {'pcl_embeddings' : object_pcl_embeddings, 'cad_embeddings': object_cad_embeddings}
         data3D['scene']   = {'pcl_coords': mesh_points[instance_ids != self.undefined], 'pcl_feats': mesh_colors[instance_ids != self.undefined], 'scene_label' : scene_label}

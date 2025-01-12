@@ -27,7 +27,7 @@ class Scan3R2DProcessor(Base2DProcessor):
         self.scan_ids = []
         self.scan_ids = scan3r.get_scan_ids(files_dir, split)
         
-        self.out_dir = config_data.process_dir
+        self.out_dir = osp.join(config_data.process_dir, 'scans')
         load_utils.ensure_dir(self.out_dir)
         
         self.orig_image_size = config_2D.image.orig_size
@@ -52,7 +52,8 @@ class Scan3R2DProcessor(Base2DProcessor):
         for scan_id in tqdm(self.scan_ids):
             self.compute2DImagesAndSeg(scan_id)
             self.compute2DFeaturesEachScan(scan_id)   
-            self.computeAllImageFeaturesEachScan(scan_id)
+            if self.split == 'val':
+                self.computeAllImageFeaturesEachScan(scan_id)
     
     def compute2DImagesAndSeg(self, scan_id: str) -> None:
         scene_folder = osp.join(self.data_dir, 'scans', scan_id)
