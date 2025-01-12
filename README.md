@@ -84,12 +84,22 @@ GPU: GeForce RTX 4090/RTX 3090
 
 Clone the repo and setup as follows:
 
-```
+```bash
 git clone git@github.com:GradientSpaces/CrossOver.git
 cd CrossOver
 conda env create -f req.yml
 conda activate crossover
 ```
+
+For scene retrieval point cloud processing, we use `MinkowskiEngine`. Setup as follows:
+
+```bash
+git clone --recursive "https://github.com/EthenJ/MinkowskiEngine"
+conda install openblas-devel -c anaconda
+python setup.py install --blas_include_dirs=${CONDA_PREFIX}/include --force_cuda --blas=openblas
+```
+
+> Since we use CUDA 12.1, we use the above fork; for other CUDA drivers, please refer to the official [repo](https://github.com/NVIDIA/MinkowskiEngine).
 
 # :wrench: Data Preprocessing
 In order to process data faster during training + inference, we preprocess 1D (referral), 2D (RGB + floorplan) & 3D (Point Cloud + CAD) for both object instances and scenes. Note that, since for 3RScan dataset, they do not provide frame-wise RGB segmentations, we project the 3D data to 2D and store it in `.pt` format for every scan. We provide the scripts for projection and release the data.
@@ -116,7 +126,7 @@ bash scripts/train/train_instance_crossover.sh
 ```
 
 #### Train Scene Retrieval Pipeline
-Adjust path parameters in `configs/train/train_unified.yaml` and run the following:
+Adjust path/configuration parameters in `configs/train/train_unified.yaml`. You can also add your customised dataset or choose to train on Scannet & Scan3R or either. Run the following:
 
 ```bash
 bash scripts/train/train_scene_crossover.sh
@@ -137,10 +147,15 @@ We provide all available checkpoints on G-Drive [here](). Here we provide detail
 | ``scene_crossover``    | Unified CrossOver trained on ScanNet           |  [ScanNet]()        |
 | ``scene_crossover``    | Unified CrossOver trained on ScanNet + Scan3R  |  [ScanNet+Scan3R]() |
 
-
-
 # :bar_chart: Evaluation
 
+#### Cross-Modal Object Retrieval
+
+#### Cross-Modal Scene Retrieval
+
+#### Single RGB Image Based Scene Retrieval
+
 # :pray: Acknowledgements
+We thank the authors from [3D-VisTa](https://github.com/3d-vista/3D-VisTA), [SceneVerse](https://github.com/scene-verse/sceneverse) and [SceneGraphLoc](https://github.com/y9miao/VLSG) for open-sourcing their codebases.
 
 # :page_facing_up: Citation

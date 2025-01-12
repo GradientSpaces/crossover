@@ -86,7 +86,7 @@ task:
     scene_modalities : ['rgb', 'point', 'floorplan', 'referral']
     train            : [Scannet, Scan3R]
     val              : [Scannet, Scan3R]
-    object_enc_ckpt  : /drive/dumps/multimodal-spaces/runs/SceneLevelGrounding_Scannet+Scan3R/2024-11-05-19:16:23.686900/ckpt/best.pth
+    object_enc_ckpt  : /drive/model_ckpts/crossover/instance_crossover_Scannet+Scan3R.pth
     
 trainer: UnifiedTrainer
 
