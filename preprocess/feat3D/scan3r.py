@@ -22,6 +22,7 @@ class Scan3R3DProcessor(Base3DProcessor):
         """
         Initializes the Scan3R3DProcessor.
         """
+        super(Scan3R3DProcessor, self).__init__(config_data, config_3D, split)
         self.data_dir = config_data.base_dir
         
         files_dir = osp.join(config_data.base_dir, 'files')

@@ -12,6 +12,7 @@ from preprocess.feat1D.base import Base1DProcessor
 class Scan3R1DProcessor(Base1DProcessor):
     """Scan3R 1D feature (relationships) processor class."""
     def __init__(self, config_data, config_1D, split) -> None:
+        super(Scan3R1DProcessor, self).__init__(config_data, config_1D, split)
         self.data_dir = config_data.base_dir
         
         files_dir = osp.join(config_data.base_dir, 'files')
@@ -29,9 +30,6 @@ class Scan3R1DProcessor(Base1DProcessor):
         
         # label map
         self.undefined = 0
-        
-        self.out_dir = config_data.process_dir
-        load_utils.ensure_dir(self.out_dir)
     
     def compute1DFeaturesEachScan(self, scan_id: str) -> None:
         scene_out_dir = osp.join(self.out_dir, scan_id)

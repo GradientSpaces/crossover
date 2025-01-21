@@ -4,6 +4,8 @@ import numpy as np
 from typing import Any, Dict, Tuple, List
 from tqdm import tqdm
 
+import sys
+sys.path.append('.')
 from common import load_utils
 from utils import scannet, labelmap
 
@@ -31,14 +33,14 @@ def convertObjectData(scan_ids: List[str], load_files: Dict[str, Dict[str, str]]
     for scan_id in tqdm(scan_ids):
         object_data['scans'].append(convertObjectDataEachScan(scan_id, load_files[scan_id], label_map))
     
-    load_utils.save_json(osp.join(out_dir, 'objects.json'), object_data)
+    load_utils.write_json(object_data, osp.join(out_dir, 'objects.json'))
         
             
 def convertObjectDataEachScan(scan_id: str, load_file: Dict[str, str], label_map: Dict[str, str]) -> Dict[str, Any]:
     mesh_file = load_file['mesh']
     aggre_file = load_file['aggre'] 
-    seg_file = ['seg']
-    meta_file = ['meta']
+    seg_file = load_file['seg']
+    meta_file = load_file['meta']
     
     _, _, instance_ids, _, object_id_to_label_id, _ \
                                                             = scannet.export(mesh_file, aggre_file, seg_file, meta_file, label_map, 

@@ -38,9 +38,8 @@ data:
 modality_info:
   1D  :
     feature_extractor: 
-      model     : LongCLIP
-      ckpt      : /drive/pretrained-models/longclip-B.pt
       embed_dim : 768
+      model_path : 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large.pth'
   
   2D  :
     feature_extractor:

@@ -17,7 +17,7 @@ class Base1DProcessor:
         self.config_1D = config_1D
         self.embed_dim = self.config_1D.feature_extractor.embed_dim
         
-        model_url = config_1D.model_path
+        model_url = config_1D.feature_extractor.model_path
         self.model = blip_feature_extractor(pretrained=model_url, image_size=224, vit='large').to(self.device)
         self.model.eval()
     

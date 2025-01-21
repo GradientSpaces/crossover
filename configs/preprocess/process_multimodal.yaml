@@ -10,7 +10,7 @@ data:
     base_dir         : /drive/datasets/Scannet
     shape_dir        : /drive/datasets/Shapenet/ShapeNetCore.v2
     process_dir      : ${data.process_dir}/Scannet
-    chunked_dir      : ${data.process_dir}/objects_chunked/Scannet
+    chunked_dir      : ${data.process_dir}/Scannet/objects_chunked/
     processor3D      : Scannet3DProcessor
     mesh_subfix      : _vh_clean_2.labels.ply
     seg_subfix       : _vh_clean_2.0.010000.segs.json
@@ -20,7 +20,7 @@ data:
   Scan3R:
     base_dir         : /drive/datasets/Scan3R
     process_dir      : ${data.process_dir}/Scan3R
-    chunked_dir      : ${data.process_dir}/objects_chunked/Scan3R
+    chunked_dir      : ${data.process_dir}/Scan3R/objects_chunked/
     processor3D      : Scan3R3DProcessor
     processor2D      : Scan3R2DProcessor
     processor1D      : Scan3R1DProcessor

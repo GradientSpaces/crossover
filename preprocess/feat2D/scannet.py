@@ -22,9 +22,9 @@ from preprocess.feat2D.base import Base2DProcessor
 class Scannet2DProcessor(Base2DProcessor):
     """Scannet 2D (RGB + Floorplan) feature processor class."""
     def __init__(self, config_data: DictConfig, config_2D: DictConfig, split: str) -> None:
+        super(Scannet2DProcessor, self).__init__(config_data, config_2D, split)
         self.data_dir = config_data.base_dir
         files_dir = osp.join(config_data.base_dir, 'files')
-        self.count = 0
         
         self.scan_ids = []
         self.scan_ids = scannet.get_scan_ids(files_dir, split)
@@ -122,7 +122,6 @@ class Scannet2DProcessor(Base2DProcessor):
                                 'frame_idxs' : frame_idxs, 'sampled_cam_idxs' : sampled_frame_idxs}
         
         data2D['scene']['floorplan'] = floorplan_dict
-        
         torch.save(data2D, osp.join(scene_out_dir, 'data2D.pt'))
     
     def computeImageFeaturesEachScan(self, scan_id: str, color_path: str, frame_idxs: List[int]) -> Tuple[np.ndarray, List[torch.tensor], np.ndarray, List[int]]:
@@ -203,9 +202,6 @@ class Scannet2DProcessor(Base2DProcessor):
             x1, y1, x2, y2 = image_util.mask2box_multi_level(mask_tensor, level)
             cropped_img = image.crop((x1, y1, x2, y2))
             cropped_img = cropped_img.resize((self.model_image_size[1], self.model_image_size[1]), Image.BICUBIC)
-            cropped_img.save(f'test_{self.count}.png')
-            self.count += 1
-            
             
             img_pt = self.model.base_tf(cropped_img)
             images_crops.append(img_pt)

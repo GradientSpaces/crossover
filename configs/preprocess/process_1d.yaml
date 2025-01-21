@@ -5,7 +5,7 @@ exp_dir  : ""
   
 data:
   sources: []
-  process_dir: ${base_dir}/
+  process_dir: ${base_dir}/preprocess_feats
   Scannet:
     base_dir       : /drive/datasets/Scannet/
     shape_dir      : /drive/datasets/Shapenet/ShapeNetCore.v2/
@@ -32,7 +32,7 @@ modality_info:
   1D  :
     feature_extractor: 
       embed_dim : 768
-      model_url : 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large.pth'
+      model_path : 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large.pth'
   
   2D  :
     feature_extractor:

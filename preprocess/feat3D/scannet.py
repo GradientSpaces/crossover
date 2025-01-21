@@ -14,6 +14,7 @@ from preprocess.feat3D.base import Base3DProcessor
 class Scannet3DProcessor(Base3DProcessor):
     """Scannet 3D (Point Cloud/CAD) feature processor class."""
     def __init__(self, config_data: DictConfig, config_3D: DictConfig, split: str) -> None:
+        super(Scannet3DProcessor, self).__init__(config_data, config_3D, split)
         self.data_dir = config_data.base_dir
         files_dir = osp.join(config_data.base_dir, 'files')
         

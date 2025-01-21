@@ -69,7 +69,7 @@ assume complete data availability across all modalities. We present **CrossOver*
 # :arrow_down: Data Download
 We currently host the required preprocessed data + meta-data on Redivis and request all applicants to fill out the form [here](). We also release instructions for data download & preparation with scripts for ScanNet + 3RScan. For detailed instructions, please look at `README.MD` in `data_prepare/` directory.
 
-> Note: You agree to the terms of ScanNet, 3RScan, ShapeNet, Scan2CAD and SceneVerse datasets by downloading our hosted data.
+> You agree to the terms of ScanNet, 3RScan, ShapeNet, Scan2CAD and SceneVerse datasets by downloading our hosted data.
 
 # :hammer_and_wrench: Installation
 The code has been tested on: 

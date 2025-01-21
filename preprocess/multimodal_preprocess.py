@@ -38,7 +38,7 @@ class MultimodalPreprocessor:
         
         self.filtered_scan_ids = []
         
-        self.out_dir = config_data.process_dir
+        self.out_dir = osp.join(config_data.process_dir, 'scans')
         self.chunked_dir = config_data.chunked_dir
         
         load_utils.ensure_dir(self.chunked_dir)
@@ -146,8 +146,8 @@ class MultimodalPreprocessor:
     def prepareDataEachScan(self, scan_id: str, hf_handler: h5py.File) -> None:
         """Process data for a single scan and store it in the HDF5 file."""
         out_dir = osp.join(self.out_dir, scan_id)
+        
         data1D = torch.load(osp.join(out_dir, 'data1D.pt'))
-
         data2D = torch.load(osp.join(out_dir, 'data2D.pt'))
         data3D = torch.load(osp.join(out_dir, 'data3D.pt'))
         

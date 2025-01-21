@@ -3,9 +3,10 @@ import torch.nn.functional as F
 import numpy as np
 from scipy.spatial import distance
 from PIL import Image
+from typing import Union
 
 # openmask3d multi-level functions
-def mask2box(mask: torch.Tensor) -> tuple[int, int, int, int] | None:
+def mask2box(mask: torch.Tensor) -> Union[tuple[int, int, int, int], None]:
     """Computes the bounding box of a binary mask."""
     row = torch.nonzero(mask.sum(axis=0))[:, 0]
     if len(row) == 0:

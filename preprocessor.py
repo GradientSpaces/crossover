@@ -26,7 +26,7 @@ def main(cfg: OmegaConf) -> None:
     log.info(message)
     
     for dataset in datasets:
-        message = "Currently processing {}".format(dataset)
+        message = "Currently processing - {}".format(dataset)
         data_config = misc.rgetattr(cfg, "data.{}".format(dataset))
         
         if task_name == 'PreprocessMultimodal':
@@ -37,9 +37,10 @@ def main(cfg: OmegaConf) -> None:
             task_modality = misc.rgetattr(task_config, "modality")
             modality_config = misc.rgetattr(cfg.modality_info, task_modality)
             processor_name   = misc.rgetattr(data_config, 'processor{}'.format(task_modality))
+            message += " Modality - {}".format(task_modality)
         
         for split in splits:
-            message += " split - {}".format(split)
+            message += " Split - {}".format(split)
             log.info(message)
             
             process_module = build.build_processor(processor_name, data_config, modality_config, split)

@@ -13,6 +13,7 @@ from preprocess.feat1D.base import Base1DProcessor
 class Scannet1DProcessor(Base1DProcessor):
     """Scannet 1D feature (relationships) processor class."""
     def __init__(self, config_data, config_1D, split) -> None:
+        super(Scannet1DProcessor, self).__init__(config_data, config_1D, split)
         self.data_dir = config_data.base_dir
         
         files_dir = osp.join(config_data.base_dir, 'files')
@@ -23,7 +24,7 @@ class Scannet1DProcessor(Base1DProcessor):
         self.out_dir = osp.join(config_data.process_dir, 'scans')
         load_utils.ensure_dir(self.out_dir)
         
-        self.objects = load_utils.load_json(osp.join(files_dir, 'objects_groundtruth.json'))['scans']
+        self.objects = load_utils.load_json(osp.join(files_dir, 'objects.json'))['scans']
         
         # Object Referrals
         self.object_referrals = load_utils.load_json(osp.join(files_dir, 'sceneverse/ssg_ref_rel2_template.json'))
@@ -31,10 +32,6 @@ class Scannet1DProcessor(Base1DProcessor):
         # label map
         self.label_map = scannet.read_label_map(files_dir, label_from = 'raw_category', label_to = 'nyu40id')
         self.undefined = 0
-        
-        self.out_dir = config_data.process_dir
-        load_utils.ensure_dir(self.out_dir)
-        
      
     def compute1DFeaturesEachScan(self, scan_id: str) -> None:
         scene_out_dir = osp.join(self.out_dir, scan_id)

@@ -21,11 +21,13 @@ from preprocess.feat2D.base import Base2DProcessor
 class Scan3R2DProcessor(Base2DProcessor):
     """Scan3R 2D (RGB) feature processor class."""
     def __init__(self, config_data: DictConfig, config_2D: DictConfig, split: str) -> None:
+        super(Scan3R2DProcessor, self).__init__(config_data, config_2D, split)
         self.data_dir = config_data.base_dir
         files_dir = osp.join(config_data.base_dir, 'files')
         
         self.scan_ids = []
-        self.scan_ids = scan3r.get_scan_ids(files_dir, split)
+        self.split = split
+        self.scan_ids = scan3r.get_scan_ids(files_dir, self.split)
         
         self.out_dir = osp.join(config_data.process_dir, 'scans')
         load_utils.ensure_dir(self.out_dir)
@@ -88,11 +90,12 @@ class Scan3R2DProcessor(Base2DProcessor):
             )
             obj_id_imgs[frame_idx] = obj_id_map
 
-        if osp.exists(osp.join(scene_folder, 'gt-projection')):
-            shutil.rmtree(osp.join(scene_folder, 'gt-projection'))
-    
+        
         # save scene-level file for efficient loading
-        torch.save(obj_id_imgs, osp.join(scene_folder, 'gt-projection-seg.pt'))
+        scene_out_dir = osp.join(self.out_dir, scan_id)
+        load_utils.ensure_dir(scene_out_dir)
+        
+        torch.save(obj_id_imgs, osp.join(scene_out_dir, 'gt-projection-seg.pt'))
     
     def compute2DFeaturesEachScan(self, scan_id: str) -> None:
         scene_folder = osp.join(self.data_dir, 'scans', scan_id)
@@ -104,7 +107,7 @@ class Scan3R2DProcessor(Base2DProcessor):
         obj_id_to_label_id_map = torch.load(osp.join(scene_out_dir, 'object_id_to_label_id_map.pt'))['obj_id_to_label_id_map']
         
         # Multi-view Image -- Object (Embeddings)
-        object_image_embeddings, object_image_votes_topK, frame_idxs = self.computeImageFeaturesAllObjectsEachScan(scene_folder, obj_id_to_label_id_map)
+        object_image_embeddings, object_image_votes_topK, frame_idxs = self.computeImageFeaturesAllObjectsEachScan(scene_folder, scene_out_dir, obj_id_to_label_id_map)
         
         # Multi-view Image -- Scene (Images + Embeddings)
         frame_idxs = list(self.frame_pose_data[scan_id].keys())
@@ -188,8 +191,8 @@ class Scan3R2DProcessor(Base2DProcessor):
         
         return pose_data, scene_images_pt, scene_image_embeddings, sampled_frame_idxs
     
-    def computeImageFeaturesAllObjectsEachScan(self, scene_folder: str, obj_id_to_label_id_map: dict) -> Tuple[Dict[int, Dict[int, np.ndarray]], Dict[int, List[int]], List[str]]:
-        object_anno_2D = torch.load(osp.join(scene_folder, 'gt-projection-seg.pt'))
+    def computeImageFeaturesAllObjectsEachScan(self, scene_folder: str, scene_out_dir: str, obj_id_to_label_id_map: dict) -> Tuple[Dict[int, Dict[int, np.ndarray]], Dict[int, List[int]], List[str]]:
+        object_anno_2D = torch.load(osp.join(scene_out_dir, 'gt-projection-seg.pt'))
         object_image_votes = {}
         
         # iterate over all frames
