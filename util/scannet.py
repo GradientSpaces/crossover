@@ -5,12 +5,11 @@ from glob import glob
 import csv
 import open3d as o3d
 from typing import Tuple, Dict, List, Union
-
 from plyfile import PlyData
 
 from common import load_utils, misc
-from utils import se3, point_cloud
-from utils.geometry import line_mesh
+from util import se3, point_cloud
+from util.geometry import line_mesh
 
 
 def read_label_map(metadata_dir: str, label_from: str = 'raw_category', label_to: str = 'nyu40class') -> Dict[Union[str, int], str]:
@@ -289,8 +288,15 @@ def get_cad_model_to_instance_mapping(instance_bboxes: np.ndarray, scan2cad_anno
             shapenet_instances[best_instance_id] = { 't' : t, 'q' : q, 's' : s, 'Mscan' : Mscan,
                                                     'verts': obj_verts, 'faces': obj_faces,
                                                     'shapenet_catid': catid_cad, 'shapenet_id': id_cad, 'points' : obj_points, 
-                                                    'sym' : sym}
-    
+                                                    'sym' : sym,
+                                                    }
+
+            R_transform = np.array(axis_align_matrix).reshape((4, 4)).dot(np.linalg.inv(Mscan))
+            Mcad = se3.make_M_from_tqs(t, q, s)
+            transform_shape = R_transform.dot(Mcad)
+            
+            shapenet_instances[best_instance_id]['transform_shape'] = transform_shape
+            
     return shapenet_instances
 
 def visualiseShapeAnnotation(shape_dir: str, scene_mesh: o3d.geometry.TriangleMesh, shape_annot_to_instance_map: Dict[int, Dict], Mscan: np.ndarray, axis_align_matrix: np.ndarray) -> None:
