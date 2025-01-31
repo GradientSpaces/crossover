@@ -44,29 +44,6 @@ data :
     max_object_len : 150
     voxel_size     : 0.02
 
-modality_info:
-  1D  :
-    feature_extractor: 
-      model     : LongCLIP
-      ckpt      : /drive/pretrained-models/longclip-L.pt
-      embed_dim : 768
-  
-  2D  :
-    feature_extractor:
-      model     : DinoV2
-      ckpt      : dinov2_vitg14
-      embed_dim : 1536
-  
-  3D  :
-    feature_extractor:
-      model      : I2PMAE
-      ckpt       : /drive/pretrained-models/pointbind_i2pmae.pt 
-      embed_dim  : 384
-    
-    voxel_size : 0.05
-    max_points_per_object : 1024
-    min_points_per_object : 50
-
 task: 
   name         : UnifiedTrain 
   UnifiedTrain :

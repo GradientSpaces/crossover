@@ -3,7 +3,6 @@ import open3d as o3d
 import numpy as np
 import torch
 from tqdm import tqdm
-import shutil
 from PIL import Image
 from scipy.spatial.transform import Rotation as R
 from omegaconf import DictConfig
