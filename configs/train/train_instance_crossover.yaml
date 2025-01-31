@@ -1,10 +1,10 @@
-name: "MMTrain"
+name: "CrossOver"
 rng_seed        : 42
 num_gpu         : 1
 base_dir        : "/drive/dumps/multimodal-spaces/"
 exp_dir         : ""
 mode            : "train"
-naming_keywords : ['task', 'time', 'all_align']
+naming_keywords : ['task', 'time']
 
 resume : False
 
@@ -14,14 +14,14 @@ logger :
 
   
 data :
-  sources     : []
+  sources     : ['Scannet']
   process_dir : ${base_dir}/preprocess_feats
   
   Scannet:
     base_dir         : /drive/datasets/Scannet
-    shape_dir        : /drive/datasets/Shapenet/ShapeNet_preprocessed/
-    process_dir      : ${data.process_dir}/Scannet
-    chunked_dir      : ${data.process_dir}/objects_chunked/Scannet
+    shape_dir        : /drive/datasets/Shapenet/ShapeNetCore.v2
+    process_dir      : ${data.process_dir}/Scannet/
+    chunked_dir      : ${data.process_dir}/Scannet/objects_chunked/
     processor1D      : Scannet1DProcessor
     processor2D      : Scannet2DProcessor
     processor3D      : Scannet3DProcessor
@@ -29,32 +29,20 @@ data :
     seg_subfix       : _vh_clean_2.0.010000.segs.json
     aggre_subfix     : _vh_clean.aggregation.json
     avail_modalities : ['point', 'cad', 'rgb', 'referral']
-    max_object_len   : 80
+    max_object_len   : 150
     voxel_size       : 0.02
   
   Scan3R:
     base_dir       : /drive/datasets/Scan3R/
     process_dir    : ${data.process_dir}/Scan3R/
+    chunked_dir    : ${data.process_dir}/Scan3R/objects_chunked/
     processor3D    : Scan3R3DProcessor
     processor2D    : Scan3R2DProcessor
     processor1D    : Scan3R1DProcessor
     label_filename : labels.instances.align.annotated.v2.ply
     avail_modalities : ['point', 'cad', 'rgb', 'referral']
-    max_object_len : 80
+    max_object_len : 150
     voxel_size     : 0.02
-  
-  Front3D:
-    base_dir       : /drive/datasets/3D-Front-rendered/
-    process_dir    : ${data.process_dir}/Front3D/
-    processor3D    : FrontD3DProcessor
-    processor2D    : FrontD2DProcessor
-    avail_modalities : ['point', 'cad', 'rgb', 'referral']
-    max_object_len : 80
-    voxel_size     : 0.02
-    skip_frames    : 1
-
-  Shapenet:
-    base_dir       : /drive/datasets/Shapenet/ShapeNet_preprocessed/
 
 modality_info:
   1D  :
@@ -79,19 +67,18 @@ modality_info:
     max_points_per_object : 1024
     min_points_per_object : 50
 
+# 'Preprocess', 'PreprocessMultimodal' 'SceneLevelGrounding', 'ObjectLevelGrounding', 'UnifiedTrain1D', 'UnifiedTrain2D', 'UnifiedTrain3D'
 task: 
-  name         : UnifiedTrain 
-  UnifiedTrain :
-    modalities       : ['rgb', 'point', 'cad', 'referral']
-    scene_modalities : ['rgb', 'point', 'floorplan', 'referral']
-    train            : [Scannet, Scan3R]
-    val              : [Scannet, Scan3R]
-    object_enc_ckpt  : /drive/model_ckpts/crossover/instance_crossover_Scannet+Scan3R.pth
-    
-trainer: UnifiedTrainer
+  name       : SceneLevelGrounding 
+  SceneLevelGrounding :
+    modalities  : ['rgb', 'point', 'cad', 'referral']
+    train       : [Scannet, Scan3R]
+    val         : [Scannet, Scan3R]
+
+trainer: GroundingTrainer
 
 model:
-  name: UnifiedEncoder
+  name: SceneLevelEncoder
   point:
     embed_dim : 384
   cad:
@@ -101,15 +88,8 @@ model:
   referral:
     embed_dim : 768
 
-  encoder1D:
-    input_dim : 768
-  encoder2D:
-    input_dim : 1536
-  encoder3D:
-    input_dim : 512
-
   out_dim       : 768
-  loss          : RetrievalLoss
+  loss          : SceneWiseContrastiveLoss
   base_modality : 'rgb'
 
 dataloader:
@@ -118,9 +98,9 @@ dataloader:
 
 eval:
   train:
-    name: RetrievalEval
+    name: GroundingEval
   val:
-    name: RetrievalEval
+    name: GroundingEval
   save: False
 
 solver:
@@ -137,5 +117,5 @@ solver:
   sched:
     name: 'warmup_cosine'
     args:
-      warmup_steps: 10
+      warmup_steps: 200
       minimum_ratio: 0.1

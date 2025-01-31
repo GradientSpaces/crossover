@@ -1,7 +1,7 @@
 import torch
 from torch import Tensor
 
-def pad_tensors(tensors: Tensor, lens: int | None = None, pad: int = 0) -> Tensor:
+def pad_tensors(tensors: Tensor, lens: int = 10, pad: int = 0) -> Tensor:
     """Pads a tensor with given value to reach specified length along first dimension."""
     assert tensors.shape[0] <= lens
     if tensors.shape[0] == lens:

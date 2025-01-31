@@ -7,7 +7,7 @@
 '''
 import warnings
 warnings.filterwarnings("ignore")
-
+import os
 import sys
 sys.path.append('/home/sayan/Documents/code/multimodal-reality/multimodal-spaces/third_party/BLIP')
 
@@ -25,7 +25,7 @@ from timm.models.hub import download_cached_file
 
 class BLIP_Base(nn.Module):
     def __init__(self,                 
-                 med_config = '/home/sayan/Documents/code/multimodal-reality/multimodal-spaces/third_party/BLIP/configs/med_config.json',  
+                 med_config = f'{os.getcwd()}/third_party/BLIP/configs/med_config.json',  
                  image_size = 224,
                  vit = 'base',
                  vit_grad_ckpt = False,

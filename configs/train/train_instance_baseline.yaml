@@ -1,4 +1,4 @@
-name: "MMTrain"
+name: "CrossOver"
 rng_seed        : 42
 num_gpu         : 1
 base_dir        : "/drive/dumps/multimodal-spaces/"
@@ -21,7 +21,7 @@ data :
     base_dir         : /drive/datasets/Scannet
     shape_dir        : /drive/datasets/Shapenet/ShapeNetCore.v2
     process_dir      : ${data.process_dir}/Scannet
-    chunked_dir      : ${data.process_dir}/objects_chunked/Scannet
+    chunked_dir      : ${data.process_dir}/Scannet/objects_chunked/
     processor1D      : Scannet1DProcessor
     processor2D      : Scannet2DProcessor
     processor3D      : Scannet3DProcessor
@@ -35,6 +35,7 @@ data :
   Scan3R:
     base_dir       : /drive/datasets/Scan3R/
     process_dir    : ${data.process_dir}/Scan3R/
+    chunked_dir    : ${data.process_dir}/Scan3R/objects_chunked/
     processor3D    : Scan3R3DProcessor
     processor2D    : Scan3R2DProcessor
     processor1D    : Scan3R1DProcessor
@@ -65,40 +66,22 @@ modality_info:
       ckpt       : /drive/pretrained-models/pointbind_i2pmae.pt 
       embed_dim  : 384
     
+    voxel_size : 0.05
     max_points_per_object : 1024
     min_points_per_object : 50
 
-# 'Preprocess', 'PreprocessMultimodal' 
-# 'SceneLevelGrounding', 'ObjectLevelGrounding', 'UnifiedTrain1D', 'UnifiedTrain2D', 'UnifiedTrain3D', 
-# 'Inference'
-
+# 'Preprocess', 'PreprocessMultimodal' 'ObjectLevelTrain', 'SceneLevelTrain', 'UnifiedTrain1D', 'UnifiedTrain2D', 'UnifiedTrain3D'
 task: 
-  # name       : InferenceObjectRetrieval
-  # InferenceObjectRetrieval:
-  #   val                     : [Scannet]
-  #   modalities              : ['rgb', 'point', 'cad', 'referral']
-  #   scene_modalities        : ['rgb', 'point']
-  #   ckpt_path               : /drive/dumps/multimodal-spaces/runs/ObjectLevelGrounding_ScannetObject/2024-10-24-07:49:05.462448/ckpt/best.pth/
-    
-  name       : InferenceObjectRetrieval
-  InferenceObjectRetrieval:
-    val                     : [Scannet]
-    modalities              : ['rgb', 'point', 'cad', 'referral']
-    scene_modalities        : ['rgb', 'point', 'referral', 'floorplan']
-    ckpt_path               : /drive/dumps/multimodal-spaces/runs/ObjectLevelGrounding_ScannetObject+Scan3RObject/2024-11-06-19:01:49.664041/ckpt/best.pth/
-    
-    # All PairWise - /drive/dumps/multimodal-spaces/runs/SceneLevelGrounding_Scan3R+Scannet/2024-11-18-17:30:52.293851/ckpt/best.pth/
-    # Object Grounding - /drive/dumps/multimodal-spaces/runs/ObjectLevelGrounding_ScannetObject+Scan3RObject/2024-11-06-19:01:49.664041/ckpt/best.pth/
-    # Scannet + Scan3R - /drive/dumps/multimodal-spaces/runs/SceneLevelGrounding_Scannet+Scan3R/2024-11-05-19:16:23.686900/ckpt/best.pth
-    # Scannet - /drive/dumps/multimodal-spaces/runs/SceneLevelGrounding_Scannet/2024-11-05-19:17:48.229838/ckpt/best.pth/
-    # Scan3R - /drive/dumps/multimodal-spaces/runs/SceneLevelGrounding_Scan3R/2024-11-05-19:19:02.866359/ckpt/best.pth/
-    
+  name       : ObjectLevelGrounding 
+  ObjectLevelGrounding :
+    modalities  : ['rgb', 'point', 'cad', 'referral']
+    train       : [ScannetObject, Scan3RObject]
+    val         : [ScannetObject, Scan3RObject]
 
-inference_module: ObjectRetrieval
+trainer: GroundingTrainer
 
-model: 
+model:
   name: ObjectLevelEncoder
-  # name: SceneLevelEncoder
   point:
     embed_dim : 384
   cad:
@@ -108,17 +91,34 @@ model:
   referral:
     embed_dim : 768
 
-  # Only For Unified Encoder
-  encoder1D:
-    input_dim : 768
-  encoder2D :
-    input_dim : 1536
-  encoder3D:
-    input_channels : 3
-    d_model        : 512
-    conv_layers    : [16, 32, 64, 128, 256]
   out_dim       : 768
+  loss          : ObjectWiseContrastiveLoss
+  base_modality : 'rgb'
 
 dataloader:
-  batch_size  : 1
-  num_workers : 4
+  batch_size  : 64
+  num_workers : 0
+
+eval:
+  train:
+    name: GroundingEval
+  val:
+    name: GroundingEval
+  save: False
+
+solver:
+  gradient_accumulation_steps: 1
+  epochs_per_save: 20
+  epochs_per_eval: 1
+  lr: 1e-3
+  grad_norm: 5.0
+  epochs: 150
+  optim:
+    name: 'AdamW'
+    args:
+      betas: [0.9, 0.98]
+  sched:
+    name: 'warmup_cosine'
+    args:
+      warmup_steps: 200
+      minimum_ratio: 0.1

@@ -6,6 +6,8 @@ import re
 from pathlib import Path
 from typing import Any
 import torch 
+import random
+import numpy as np
 
 def make_dir(dir_path: str) -> None:
     """Creates a directory if it does not exist."""
@@ -88,3 +90,12 @@ def split_sentence(sentence: str) -> list:
     sentence = [s.strip() for s in sentence]
     sentence = [s for s in sentence if len(s) > 0]
     return sentence
+
+def set_random_seed(seed: int) -> None:
+    """Sets the random seed for reproducibility."""
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False

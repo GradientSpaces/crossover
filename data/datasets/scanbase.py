@@ -129,7 +129,7 @@ class ScanBase(Dataset):
     def __getitem__(self, index: int) -> Dict[str, Any]:
         scan_id = self.scan_ids[index]
         
-        scan_process_dir = osp.join(self.process_dir, scan_id)
+        scan_process_dir = osp.join(self.process_dir, 'scans', scan_id)
         
         scan_objects_data = torch.load(osp.join(scan_process_dir, 'objectsDataMultimodal.pt'))
         

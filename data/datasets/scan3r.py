@@ -34,14 +34,6 @@ class Scan3R(ScanBase):
         filepath = osp.join(self.files_dir, '{}_scans.txt'.format(self.split))
         self.scan_ids = np.genfromtxt(filepath, dtype = str)
         
-        # Ignore Scan IDs because of extra object data
-        ignore_scan_ids = {
-            'train': [ '20c993af-698f-29c5-84b2-972451f94cfb', 'ad408c9d-84db-2095-89c7-8a54f6260252','cf00577c-b8f0-2aa8-869e-175d8b655d12', '0cac762b-8d6f-2d13-8de2-832a3c07864b', 
-                      '7f30f36c-42f9-27ed-87c6-23ceb65f1f9b', '9766cbfd-6321-2e2f-8348-7da212a30beb', 'cf00577e-b8f0-2aa8-8751-be34df30341f'],
-            'val'  : ['38770ca1-86d7-27b8-8619-ab66f67d9adf']
-        }
-        self.scan_ids = [scan_id for scan_id in self.scan_ids if scan_id not in ignore_scan_ids[self.split]]   
-        
         self.label_map = self.read_label_map(osp.join(self.files_dir, '3RScan.v2 Semantic Classes - Mapping.csv'))
         self.label_map_name = self.read_label_map(osp.join(self.files_dir, '3RScan.v2 Semantic Classes - Mapping.csv'), label_from='Global ID', label_to='Label')
         
@@ -115,20 +107,20 @@ class Scan3R(ScanBase):
     def __getitem__(self, index: int) -> Dict[str, Any]:
         scene_dict = super().__getitem__(index)
         
-        scene_dict['label_ids'] = scene_dict['label_ids'].numpy()
-        scene_dict['label_ids_rio_subset_mask'] = np.zeros((scene_dict['label_ids'].shape[0], ))
+        # scene_dict['label_ids'] = scene_dict['label_ids'].numpy()
+        # scene_dict['label_ids_rio_subset_mask'] = np.zeros((scene_dict['label_ids'].shape[0], ))
         
-        # For 3RScan temporal evaluation
-        for idx, label_id in enumerate(scene_dict['label_ids']):
-            if label_id in self.label_map_name and self.label_map_name[label_id] in RIO_CATE:
-                scene_dict['label_ids_rio_subset_mask'][idx] = 1.0
+        # # For 3RScan temporal evaluation
+        # for idx, label_id in enumerate(scene_dict['label_ids']):
+        #     if label_id in self.label_map_name and self.label_map_name[label_id] in RIO_CATE:
+        #         scene_dict['label_ids_rio_subset_mask'][idx] = 1.0
         
-        for idx, label_id in enumerate(scene_dict['label_ids']):
-            if label_id == -100: 
-                continue
-            scene_dict['label_ids'][idx] = self.label_map[label_id]
+        # for idx, label_id in enumerate(scene_dict['label_ids']):
+        #     if label_id == -100: 
+        #         continue
+        #     scene_dict['label_ids'][idx] = self.label_map[label_id]
         
-        scene_dict['label_ids'] = torch.from_numpy(scene_dict['label_ids'])
-        scene_dict['label_ids_rio_subset_mask'] = torch.from_numpy(scene_dict['label_ids_rio_subset_mask'])
+        # scene_dict['label_ids'] = torch.from_numpy(scene_dict['label_ids'])
+        # scene_dict['label_ids_rio_subset_mask'] = torch.from_numpy(scene_dict['label_ids_rio_subset_mask'])
         
         return scene_dict

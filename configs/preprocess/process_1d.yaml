@@ -1,4 +1,4 @@
-name: "PreProcess3D"
+name: "PreProcess1D"
 
 base_dir : "/drive/dumps/multimodal-spaces"
 exp_dir  : ""

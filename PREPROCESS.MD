@@ -4,10 +4,10 @@ For faster processing, we pre-compute the 1D, 2D & 3D encoder features. Here's a
 - Object Instance: Referral, Multi-view RGB images, Point Cloud & CAD (only for ScanNet)
 - Scene: Referral, Multi-view RGB images, Floorplan (only for ScanNet) Point Cloud 
 
-We release the preprocessed & generated data on our Redivis. Aside from releasing the data, we also provide the scripts which should be easily cusotmizable for new datasets. Further instructions below.
+We release the preprocessed & generated data on GDrive. We also provide the scripts which should be easily cusotmizable for new datasets. Further instructions below.
 
 ## ScanNet
-Here we refer to the contents of the folder `preprocessed_data/Scannet` on our Redivis. The data structure is the following:
+Here we refer to the contents of the folder `processed_data/Scannet` on GDrive. The data structure is the following:
 
 ```
 Scannet/
@@ -35,7 +35,7 @@ bash scripts/preprocess/process_scannet.sh
 ```
 
 ## Scan3R
-Here we refer to the contents of the folder `preprocessed_data/Scan3R` on our Redivis. The data structure is the following:
+Here we refer to the contents of the folder `processed_data/Scan3R` on GDrive. The data structure is the following:
 
 ```
 Scan3R/

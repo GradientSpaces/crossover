@@ -1,10 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import itertools
 from typing import Dict, Any
+import itertools
 
-from common.constants import ModalityType
 from fvcore.common.registry import Registry
 import numpy as np
 
@@ -36,25 +35,27 @@ class RetrievalLoss(nn.Module):
 
     def forward(self, data_dict: Dict[str, Any]) -> torch.tensor:
         loss_dict = {}
-        output_embeddings = data_dict['embeddings']
-        modality_combinations = list(itertools.combinations(output_embeddings.keys(), 2))
+        base_type = 'object'
+        a_embed = data_dict['embeddings'][base_type]
         
-        for src_modality, ref_modality in modality_combinations:
-            a_embed = output_embeddings[src_modality]
-            b_embed = output_embeddings[ref_modality]
+        for modality_type in data_dict['embeddings']:
+            if modality_type == base_type: 
+                continue
             
-            mask = torch.logical_and(data_dict['scene_masks'][src_modality], data_dict['scene_masks'][ref_modality])
+            b_embed = data_dict['embeddings'][modality_type]
+            mask = torch.logical_and(data_dict['scene_masks'][base_type], data_dict['scene_masks'][modality_type]).reshape(-1, )
             
             if mask.sum() == 0:
                 loss = torch.tensor(0.0, requires_grad=True, device=a_embed.device)
             else:
                 loss = self.calculate_loss(a_embed, b_embed, mask)
-            
-            loss_dict[f'loss_{src_modality}_{ref_modality}'] = loss
+            loss_dict[f'loss_{modality_type}'] = loss
+
+        loss_dict['total_loss'] = sum(loss_dict.values())
         
-        total_loss = sum(loss_dict.values())
-        loss_dict['total_loss'] = total_loss
-        return total_loss, loss_dict
+        assert not torch.any(torch.isnan(loss_dict['total_loss'])), 'Loss Coming NaN!!!'
+        
+        return loss_dict['total_loss'], loss_dict
 
 class ContrastiveLoss(nn.Module):
     def __init__(self, base_modality: str):
