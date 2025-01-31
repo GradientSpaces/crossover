@@ -4,12 +4,14 @@ from tqdm import tqdm
 from omegaconf import DictConfig
 from typing import List, Dict, Union, Optional
 
+from common import load_utils
 from third_party.BLIP.models.blip import blip_feature_extractor
 
 class Base1DProcessor:
     """Base 1D feature (relationships) processor class."""
     def __init__(self, config_data: DictConfig, config_1D: DictConfig, split: str) -> None:
         # get device 
+        load_utils.set_random_seed(42)
         if not torch.cuda.is_available(): 
             raise RuntimeError('No CUDA devices available.')
         self.device = torch.device("cuda")

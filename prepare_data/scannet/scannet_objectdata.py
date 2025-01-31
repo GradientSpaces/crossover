@@ -7,7 +7,7 @@ from tqdm import tqdm
 import sys
 sys.path.append('.')
 from common import load_utils
-from utils import scannet, labelmap
+from util import scannet, labelmap
 
 def get_scan_load_files(scans_dir: str) -> Tuple[List[str], Dict[str, Dict[str, str]]]:
     load_files = {}

@@ -3,11 +3,13 @@ import torch
 from omegaconf import DictConfig
 from typing import List
 
+from common import load_utils
 from modules.build import build_module
 
 class Base2DProcessor:
     """Base 2D feature processor class."""
-    def __init__(self, config_data: DictConfig, config_2D: DictConfig, split: str) -> None:    
+    def __init__(self, config_data: DictConfig, config_2D: DictConfig, split: str) -> None: 
+        load_utils.set_random_seed(42)   
         # get device 
         if not torch.cuda.is_available(): 
             raise RuntimeError('No CUDA devices available.')

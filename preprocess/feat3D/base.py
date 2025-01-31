@@ -4,12 +4,14 @@ from tqdm import tqdm
 from omegaconf import DictConfig
 from typing import Any, Dict
  
-from utils import point_cloud
+from common import load_utils
+from util import point_cloud
 from modules.build import build_module
 
 class Base3DProcessor:
-    """Base 3D feature processor class."""
+    """Base 3D feature (point cloud + CAD) processor class."""
     def __init__(self, config_data: DictConfig, config_3D: DictConfig, split: str) -> None:
+        load_utils.set_random_seed(42)
         # get device 
         if not torch.cuda.is_available(): 
             raise RuntimeError('No CUDA devices available.')

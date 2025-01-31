@@ -2,7 +2,7 @@ import os.path as osp
 import torch
 import numpy as np
 from common import load_utils 
-from utils import scan3r
+from util import scan3r
 from typing import Dict, List, Union
 
 from preprocess.build import PROCESSOR_REGISTRY

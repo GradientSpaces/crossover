@@ -10,8 +10,8 @@ from omegaconf import DictConfig
 from typing import List, Dict, Tuple
 
 from common import load_utils
-from utils import render, scan3r, visualisation
-from utils import image as image_util
+from util import render, scan3r, visualisation
+from util import image as image_util
 
 
 from preprocess.build import PROCESSOR_REGISTRY

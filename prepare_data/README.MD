@@ -18,10 +18,10 @@ Before you begin, simply activate the `crossover` conda environment.
 
 - **ShapeNet**: Download Shapenet dataset from the [official website](https://shapenet.org/).
 
-> You only need to download ShapeNet dataset if you are running our preprocessing script(s), training + evaluation directly uses our provided preprocessed data.
+> You only need to download ShapeNet dataset if you are running our preprocessing + single inference script(s), training + evaluation directly uses our provided preprocessed data.
 
 ### Download Referral and CAD annotations
-We use [SceneVerse](https://scene-verse.github.io/) for instance referrals (ScanNet & 3RScan) and [Scan2CAD](https://github.com/skanti/Scan2CAD) for CAD annotations (ScanNet). We currently host all data on Redivis (refer to README.md in the root directory of the repo for access). Exact instructions for data setup below.
+We use [SceneVerse](https://scene-verse.github.io/) for instance referrals (ScanNet & 3RScan) and [Scan2CAD](https://github.com/skanti/Scan2CAD) for CAD annotations (ScanNet). We currently host all data on GDrive (refer to README.md in the root directory of the repo for access). Exact instructions for data setup below.
 
 #### ScanNet
 1. Run the following to extract ScanNet data 
@@ -31,7 +31,7 @@ python preprocess_2d_scannet.py --scannet_path PATH_TO_SCANNET --output_path PAT
 python unzip_scannet.py --scannet_path PATH_TO_SCANNET --output_path PATH_TO_SCANNET
 ```
 
-2. Download `files/` under `meta_data/ScanNet/` from Redivis and place under `PATH_TO_SCANNET/`.
+2. Download `files/` under `processed_data/meta_data/ScanNet/` from GDrive and place under `PATH_TO_SCANNET/`.
 
 Once completed, the data structure would look like the following:
 
@@ -65,7 +65,7 @@ For clarity, We provide the script `scannet_objectdata.py` to generate `files/ob
 
 #### 3RScan
 
-1. Download `files/` under `meta_data/Scan3R/` from Redivis and place under `PATH_TO_SCAN3R/`.
+1. Download `files/` under `processed_data/meta_data/Scan3R/` from GDrive and place under `PATH_TO_SCAN3R/`.
 
 2. Run the following to align the re-scans and reference scans in the same coordinate system & unzip `sequence.zip` for every scan:
 

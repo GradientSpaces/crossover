@@ -3,7 +3,7 @@ import torch
 import numpy as np
 
 from common import load_utils 
-from utils import scannet
+from util import scannet
 from typing import Dict, List, Union
 
 from preprocess.build import PROCESSOR_REGISTRY

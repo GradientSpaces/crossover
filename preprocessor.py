@@ -18,8 +18,6 @@ def main(cfg: OmegaConf) -> None:
     task_config = misc.rgetattr(cfg.task, task_name)
     
     assert task_name in ['Preprocess', 'PreprocessMultimodal']
-    
-    
     splits = misc.rgetattr(task_config, "splits")
     
     message = "Task -- {}, Datasets -- {}".format(task_name, datasets)
@@ -46,6 +44,5 @@ def main(cfg: OmegaConf) -> None:
             process_module = build.build_processor(processor_name, data_config, modality_config, split)
             process_module.run()
     
-
 if __name__ == '__main__':
     main()

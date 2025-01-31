@@ -4,14 +4,14 @@ For faster processing, we pre-compute the 1D, 2D & 3D encoder features. Here's a
 - Object Instance: Referral, Multi-view RGB images, Point Cloud & CAD (only for ScanNet)
 - Scene: Referral, Multi-view RGB images, Floorplan (only for ScanNet) Point Cloud 
 
-We release the preprocssed & generated data on our Redivis. Aside from releasing the data, we also provide the scripts which should be easily cusotmizable for new datasets. Further instructions below.
+We release the preprocessed & generated data on our Redivis. Aside from releasing the data, we also provide the scripts which should be easily cusotmizable for new datasets. Further instructions below.
 
 ## ScanNet
 Here we refer to the contents of the folder `preprocessed_data/Scannet` on our Redivis. The data structure is the following:
 
 ```
 Scannet/
-├── objects_chunked/ (object data chunked into hdf5 format for instance level baseline training)
+├── objects_chunked/ (object data chunked into hdf5 format for instance baseline training)
 |   ├── train_objects.h5
 |   └── val_objects.h5
 ├── scans/
@@ -39,7 +39,7 @@ Here we refer to the contents of the folder `preprocessed_data/Scan3R` on our Re
 
 ```
 Scan3R/
-├── objects_chunked/ (object data chunked into hdf5 format for instance level baseline training)
+├── objects_chunked/ (object data chunked into hdf5 format for instance baseline training)
 |   ├── train_objects.h5
 |   └── val_objects.h5
 ├── scans/
@@ -56,8 +56,6 @@ Scan3R/
 ```
 
 ### Running preprocessing scripts
-
-
 Adjust the path parameters of `Scan3R` in the config files under `configs/preprocess`. Run the following (after changing the `--config-path` in the bash file):
 
 ```bash
@@ -67,4 +65,4 @@ bash scripts/preprocess/process_scan3r.sh
 Our script for Scan3R dataset performs the following additional processing:
 
 - 3D-to-2D projection for 2D segmentation and stores as `gt-projection-seg.pt` for each scan.
-- DinoV2 feature computation for every image in every scan in the `val` split. (used for comparison with SceneGraphLoc) - `computeAllImageFeaturesEachScan()` in `preprocess/feat2d/scan3r.py` 
+- DinoV2 feature computation for every image in every scan in the `val` split. (used only for comparison with SceneGraphLoc) - `computeAllImageFeaturesEachScan()` in `preprocess/feat2d/scan3r.py` 

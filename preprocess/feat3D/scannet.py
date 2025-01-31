@@ -5,14 +5,14 @@ import torch
 from omegaconf import DictConfig
 
 from common import load_utils 
-from utils import scannet, labelmap
+from util import scannet, labelmap, render
 
 from preprocess.build import PROCESSOR_REGISTRY
 from preprocess.feat3D.base import Base3DProcessor
 
 @PROCESSOR_REGISTRY.register()
 class Scannet3DProcessor(Base3DProcessor):
-    """Scannet 3D (Point Cloud/CAD) feature processor class."""
+    """Scannet 3D (Point Cloud + CAD) feature processor class."""
     def __init__(self, config_data: DictConfig, config_3D: DictConfig, split: str) -> None:
         super(Scannet3DProcessor, self).__init__(config_data, config_3D, split)
         self.data_dir = config_data.base_dir
@@ -54,6 +54,9 @@ class Scannet3DProcessor(Base3DProcessor):
         seg_file = self.load_files[scan_id]['seg']
         meta_file = self.load_files[scan_id]['meta']
         
+        scene_out_dir = osp.join(self.out_dir, scan_id)
+        load_utils.ensure_dir(scene_out_dir)
+        
         mesh_vertices, _, instance_ids, instance_bboxes, object_id_to_label_id, axis_align_matrix \
                                                                 = scannet.export(mesh_file, aggre_file, seg_file, meta_file, self.label_map, 
                                                                                 axis_alignment = True, output_file=None)
@@ -76,7 +79,10 @@ class Scannet3DProcessor(Base3DProcessor):
         if len(shape_annot) > 0: 
             shape_annot = shape_annot[0]
             shape_annot_to_instance_map = scannet.get_cad_model_to_instance_mapping(instance_bboxes, shape_annot, meta_file, self.shape_dir)
-        
+
+            render_out_dir = osp.join(scene_out_dir, 'render')
+            load_utils.ensure_dir(render_out_dir)
+            
         for instance_id in unique_instance_ids:
             if instance_id == self.undefined: 
                 continue
@@ -92,7 +98,11 @@ class Scannet3DProcessor(Base3DProcessor):
                 shape_annot_instance = shape_annot_to_instance_map[instance_id]
                 object_cad_pcl = shape_annot_instance['points']
                 object_cad_embeddings[instance_id] = self.normalizeObjectPCLAndExtractFeats(object_cad_pcl)
-            
+                
+                obj_verts, obj_faces, transform_shape = shape_annot_instance['verts'], shape_annot_instance['faces'], shape_annot_instance['transform_shape']
+                # load_utils.ensure_dir(osp.join(render_out_dir, f'{instance_id}'))
+                # render.render_multiview_images(obj_verts, obj_faces, transform_shape, osp.join(render_out_dir, f'{instance_id}'))
+        
         data3D = {}    
         data3D['objects'] = {'pcl_embeddings' : object_pcl_embeddings, 'cad_embeddings': object_cad_embeddings}
         data3D['scene']   = {'pcl_coords': mesh_points[instance_ids != self.undefined], 'pcl_feats': mesh_colors[instance_ids != self.undefined], 'scene_label' : scene_label}
@@ -102,8 +112,7 @@ class Scannet3DProcessor(Base3DProcessor):
         assert len(list(object_id_to_label_id.keys())) >= len(list(object_pcl_embeddings.keys())), 'PC does not match for {}'.format(scan_id)
         assert len(list(object_id_to_label_id.keys())) >= len(list(object_cad_embeddings.keys())), 'CAD does not match for {}'.format(scan_id)
         
-        scene_out_dir = osp.join(self.out_dir, scan_id)
-        load_utils.ensure_dir(scene_out_dir)
+        
         
         torch.save(data3D, osp.join(scene_out_dir, 'data3D.pt'))
         torch.save(object_id_to_label_id_map, osp.join(scene_out_dir, 'object_id_to_label_id_map.pt'))

@@ -12,8 +12,8 @@ from omegaconf import DictConfig
 from typing import List, Dict, Tuple
 
 from common import load_utils
-from utils import render, scannet, visualisation
-from utils import image as image_util
+from util import render, scannet, visualisation
+from util import image as image_util
 
 from preprocess.build import PROCESSOR_REGISTRY
 from preprocess.feat2D.base import Base2DProcessor
@@ -23,18 +23,19 @@ class Scannet2DProcessor(Base2DProcessor):
     """Scannet 2D (RGB + Floorplan) feature processor class."""
     def __init__(self, config_data: DictConfig, config_2D: DictConfig, split: str) -> None:
         super(Scannet2DProcessor, self).__init__(config_data, config_2D, split)
+        self.split = split
         self.data_dir = config_data.base_dir
         files_dir = osp.join(config_data.base_dir, 'files')
         
         self.scan_ids = []
-        self.scan_ids = scannet.get_scan_ids(files_dir, split)
+        self.scan_ids = scannet.get_scan_ids(files_dir, self.split)
         
         self.out_dir = osp.join(config_data.process_dir, 'scans')
         load_utils.ensure_dir(self.out_dir)
         
         self.orig_image_size = config_2D.image.orig_size
         self.model_image_size = config_2D.image.model_size
-        
+         
         self.frame_skip = config_data.skip_frames
         self.top_k = config_2D.image.top_k
         self.num_levels = config_2D.image.num_levels
@@ -44,14 +45,13 @@ class Scannet2DProcessor(Base2DProcessor):
         self.shape_dir = config_data.shape_dir
         self.shape_annot = load_utils.load_json(osp.join(files_dir, 'scan2cad_full_annotations.json')) 
         
-        
         self.frame_pose_data = {}
         for scan_id in self.scan_ids:
             pose_data = scannet.load_poses(osp.join(self.data_dir, 'scans'), scan_id, skip=self.frame_skip)
             self.frame_pose_data[scan_id] = pose_data
         
     def compute2DFeatures(self):
-        for scan_id in tqdm(self.scan_ids):
+        for scan_id in tqdm(self.scan_ids): 
             self.compute2DFeaturesEachScan(scan_id)   
     
     def renderShapeAndFloorplan(self, scene_folder: str, scene_out_folder: str, scan_id: str) -> Image.Image:
@@ -95,10 +95,11 @@ class Scannet2DProcessor(Base2DProcessor):
             render_img = render_img.resize((self.model_image_size[1], self.model_image_size[0]), Image.BICUBIC)
             render_img_pt = self.model.base_tf(render_img)
             floorplan_embeddings = self.extractFeatures([render_img_pt], return_only_cls_mean = False)            
+        
         floorplan_dict = {'img' : render_img, 'embedding' : floorplan_embeddings}
             
         # Multi-view Image -- Object (Embeddings)
-        object_image_embeddings, object_image_votes_topK = self.computeImageFeaturesAllObjectsEachScan(scene_folder, frame_idxs)
+        object_image_embeddings, object_image_votes_topK = self.computeImageFeaturesAllObjectsEachScan(scene_folder, scene_out_dir, frame_idxs)
     
         # Multi-view Image -- Scene (Images + Embeddings)
         color_path = osp.join(scene_folder, 'data/color')
@@ -151,7 +152,7 @@ class Scannet2DProcessor(Base2DProcessor):
         
         return pose_data, scene_images_pt, scene_image_embeddings, sampled_frame_idxs
     
-    def computeImageFeaturesAllObjectsEachScan(self, scene_folder: str, frame_idxs: List[str]) -> Tuple[Dict[int, Dict[int, np.ndarray]], Dict[int, List[int]]]:
+    def computeImageFeaturesAllObjectsEachScan(self, scene_folder: str, scene_out_dir: str, frame_idxs: List[str]) -> Tuple[Dict[int, Dict[int, np.ndarray]], Dict[int, List[int]]]:
         instance_path = osp.join(scene_folder, 'data/instance-filt')
         object_image_votes, object_anno_2d = {}, {}
         for frame_idx in frame_idxs:
@@ -180,12 +181,10 @@ class Scannet2DProcessor(Base2DProcessor):
             else:
                 object_image_votes_topK[object_id] = sorted_frame_idxs
         
-        
         object_image_embeddings = {}
         for object_id in object_image_votes_topK:
             object_image_votes_topK_frames = object_image_votes_topK[object_id]
             object_image_embeddings[object_id] = {}
-            
             for frame_idx in object_image_votes_topK_frames:
                 image_path = osp.join(scene_folder, 'data/color', str(frame_idx) + '.jpg')
                 color_img = Image.open(image_path)

@@ -7,21 +7,15 @@ from omegaconf import DictConfig
 from typing import Any, Dict
 
 from common import load_utils 
-from utils import point_cloud, scan3r
+from util import point_cloud, scan3r
 
 from preprocess.build import PROCESSOR_REGISTRY
 from preprocess.feat3D.base import Base3DProcessor
 
 @PROCESSOR_REGISTRY.register()
 class Scan3R3DProcessor(Base3DProcessor):
-    """
-    Scan3R3DProcessor processes 3D scan data from the Scan3R dataset.
-    """
-
+    """Scan3R 3D feature (point cloud) processor class."""
     def __init__(self, config_data: DictConfig, config_3D: DictConfig, split: str) -> None:
-        """
-        Initializes the Scan3R3DProcessor.
-        """
         super(Scan3R3DProcessor, self).__init__(config_data, config_3D, split)
         self.data_dir = config_data.base_dir
         
@@ -49,9 +43,6 @@ class Scan3R3DProcessor(Base3DProcessor):
         self.feature_extractor = self.loadFeatureExtractor(config_3D, "3D")
     
     def compute3DFeaturesEachScan(self, scan_id: str) -> None:
-        """
-        Computes 3D features for a single scan.
-        """
         ply_data = scan3r.load_ply_data(osp.join(self.data_dir, 'scans'), scan_id, self.label_filename)
         mesh_points = np.stack([ply_data['x'], ply_data['y'], ply_data['z']]).transpose((1, 0))
         
