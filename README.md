@@ -45,23 +45,17 @@ assume complete data availability across all modalities. We present **CrossOver*
 <details open="open" style='padding: 10px; border-radius:5px 30px 30px 5px; border-style: solid; border-width: 1px;'>
   <summary>Table of Contents</summary>
   <ol>
-    <li>
-      <a href="#arrow_down-data-download">Data Download</a>
-    </li>
-    <li>
+  <li>
       <a href="#hammer_and_wrench-installation">Installation</a>
     </li>
     <li>
-      <a href="#wrench-data-preprocessing">Data Preprocessing</a>
+      <a href="#arrow_down-data">Data</a>
     </li>
     <li>
       <a href="#film_projector-demo">Demo</a>
     </li>
     <li>
-      <a href="#weight_lifting-training">Training</a>
-    </li>
-    <li>
-      <a href="#bar_chart-evaluation">Evaluation</a>
+      <a href="#weight_lifting-training-and-inference">Training & Inference</a>
     </li>
     <li>
       <a href="#pray-acknowledgements">Acknowledgements</a>
@@ -76,41 +70,6 @@ assume complete data availability across all modalities. We present **CrossOver*
 # :newspaper: News
 - ![](https://img.shields.io/badge/New!-8A2BE2) [2025-02] We release the preprocessed + generated embedding data. Fill out the [form]() for the download link!
 - ![](https://img.shields.io/badge/New!-8A2BE2) [2025-02] We release CrossOver on [arXiv](). Checkout our [paper]() and [website](https://sayands.github.io/crossover/).
-
-
-# :arrow_down: Data Download
-
-## Preprocessed Data
-We release required preprocessed data + meta-data and provide instructions for data download & preparation with scripts for ScanNet + 3RScan. 
-
-- For dataset download (single inference setup), please look at `README.MD` in `data_prepare/` directory.
-- For preprocessed data download (training + evaluation only), please refer to [Data Preprocessing](#wrench-data-preprocessing).
-
-> You agree to the terms of ScanNet, 3RScan, ShapeNet, Scan2CAD and SceneVerse datasets by downloading our hosted data.
-
-## Generated Embedding Data
-We release the embeddings created with CrossOver on the datasets used (`embed_data`/ in GDrive), which can be used for cross-modal retrieval with a custom dataset.
-
-- `embed_scannet.pt`: Scene Embeddings For All Modalities (Point Cloud, RGB, Floorplan, Referral) in ScanNet
-- `embed_scan3r.pt` : Scene Embeddings For All Modalities (Point Cloud, RGB, Referral) in ScanNet
-
-File structure below:
-
-```json
-{
-  "scene": [{
-    "scan_id": "the ID of the scan",
-    "scene_embeds": {
-        "modality_name"     : "modality_embedding"
-      }
-    "mask" : "modality_name" : "True/False whether modality was present in the scan"
-    },
-    {
-      ...
-    },...
-  ]
-}
-```
 
 # :hammer_and_wrench: Installation
 The code has been tested on: 
@@ -146,6 +105,17 @@ pip install pointnet2_ops_lib/.
 
 > Since we use CUDA 12.1, we use the above `MinkowskiEngine` fork; for other CUDA drivers, please refer to the official [repo](https://github.com/NVIDIA/MinkowskiEngine).
 
+# :arrow_down: Data
+See [DATA.MD](DATA.md) for detailed instructions on data download, preparation and preprocessing. We list the available data used in the current version of CrossOver in the table below:
+
+
+| Dataset Name | Object Modality               | Scene Modality                      | Object Temporal Information | Scene Temporal Information
+| ------------ | ----------------------------- | ----------------------------------- |  -------------------------- | -------------------------- |
+| Scannet      | `[point, rgb, cad, referral]` | `[point, rgb, floorplan, referral]` |    ❌                       |          ✅                |
+| 3RScan       | `[point, rgb, referral]`      | `[point, rgb, referral]`            |    ✅                       |          ✅                |
+
+> To run our demo, you only need to download generated embedding data; no need for downloading preprocessed data.
+
 # :film_projector: Demo
 This demo script allows users to process a custom scene and retrieve the closest match from ScanNet/3RScan using different modalities. Detailed usage can be found inside the script. Example usage below:
 
@@ -165,35 +135,9 @@ For pre-trained model download, refer to data download and checkpoints sections.
 
 > We also provide scripts for inference on a single scan Scannet/3RScan data. Details in [Single Inference](#shield-single-inference) section.
 
-# :wrench: Data Preprocessing
-In order to process data faster during training + inference, we preprocess 1D (referral), 2D (RGB + floorplan) & 3D (Point Cloud + CAD) for both object instances and scenes. Note that, since for 3RScan dataset, they do not provide frame-wise RGB segmentations, we project the 3D data to 2D and store it in `.pt` format for every scan. We provide the scripts for projection and release the data.
+# :weight_lifting: Training and Inference 
 
-Please refer to `PREPROCESS.MD` for details. 
-
-# :weight_lifting: Training 
-
-#### Train Instance Baseline
-Adjust path parameters in `configs/train/train_instance_baseline.yaml` and run the following:
-
-```bash
-bash scripts/train/train_instance_baseline.sh
-```
-
-#### Train Instance Retrieval Pipeline
-Adjust path parameters in `configs/train/train_instance_crossover.yaml` and run the following:
-
-```bash
-bash scripts/train/train_instance_crossover.sh
-```
-
-#### Train Scene Retrieval Pipeline
-Adjust path/configuration parameters in `configs/train/train_scene_crossover.yaml`. You can also add your customised dataset or choose to train on Scannet & 3RScan or either. Run the following:
-
-```bash
-bash scripts/train/train_scene_crossover.sh
-```
-
-> The scene retrieval pipeline uses the trained weights from instance retrieval pipeline (for object feature calculation), please ensure to update `task:UnifiedTrain:object_enc_ckpt` in the config file.
+See [TRAIN.md](TRAIN.md) for the inventory of available checkpoints and detailed instructions on training and inference/evaluation with pre-trained checkpoints. The checkpoint inventory is listed below:
 
 #### Checkpoints
 We provide all available checkpoints on G-Drive [here](https://drive.google.com/drive/folders/1iGhLQY86RTfc87qArOvUtXAhpbFSFq6w?usp=sharing). Detailed descriptions in the table below:
@@ -208,45 +152,11 @@ We provide all available checkpoints on G-Drive [here](https://drive.google.com/
 | ``instance_crossover`` | Instance CrossOver trained on ScanNet + 3RScan |  [ScanNet+3RScan](https://drive.google.com/drive/folders/1B_DqBY47SDQ5YmjDFAyHu59Oi7RzY3w5?usp=sharing) |
 | ``scene_crossover``    | Unified CrossOver trained on ScanNet + 3RScan  |  [ScanNet+3RScan](https://drive.google.com/drive/folders/1TMlMTbBRkTHc0AU5SbpKHLCRFUh_mMn5?usp=sharing) |
 
-# :shield: Single Inference
-We release script to perform inference (generate scene-level embeddings) on a single scan of 3RScan/Scannet. Detailed usage in the file. Quick instructions below:
-
-```bash
-python single_inference/scene_inference.py
-```
-
-Various configurable parameters:
-
-- `--dataset`: dataset name, Scannet/Scan3R
-- `--data_dir`: data directory (eg: `./datasets/Scannet`, assumes similar structure as in `preprocess.md`).
-- `--floorplan_dir`: directory consisting of the rasterized floorplans (this can point to the downloaded preprocessed directory), only for Scannet
-- `--ckpt`: Path to the pre-trained scene crossover model checkpoint (details [here](#checkpoints)), example_path: `./checkpoints/scene_crossover_scannet+scan3r.pth/`).
-- `--scan_id`: the scan id from the dataset you'd like to calculate embeddings for (if not provided, embeddings for all scans are calculated).
-
-The script will output embeddings in the same format as provided [here](#generated-embedding-data).
-
-# :bar_chart: Evaluation
-#### Cross-Modal Object Retrieval
-Run the following script (refer to the script to run instance baseline/instance crossover). Detailed usage inside the script.
-
-```bash
-bash scripts/evaluation/eval_instance_retrieval.sh
-```
-
-> This will also show you scene retrieval results using the instance based methods.
-
-#### Cross-Modal Scene Retrieval
-Run the following script (for scene crossover). Detailed usage inside the script.
-
-```bash
-bash scripts/evaluation/eval_instance_retrieval.sh
-```
-
 ## 🚧 TODO List
 - [ ] Release evaluation on temporal instance matching
-- [ ] Release inference code on single image-based scene retrieval
-- [ ] Release inference on single scan cross-modal object retrieval
-- [ ]  Release inference using baselines
+- [ ] Release inference  on single image-based scene retrieval
+- [ ] Release inference  on single scan cross-modal object retrieval
+- [ ] Release inference using baselines
 
 # :pray: Acknowledgements
 We thank the authors from [3D-VisTa](https://github.com/3d-vista/3D-VisTA), [SceneVerse](https://github.com/scene-verse/sceneverse) and [SceneGraphLoc](https://github.com/y9miao/VLSG) for open-sourcing their codebases.

@@ -1,12 +1,57 @@
-# Dataset Preprocessing
-For faster processing, we pre-compute the 1D, 2D & 3D encoder features. Here's an overview which data features are precomputed:
+# :arrow_down: Data
+
+## Data Download
+
+### Data Preparation + Processing
+
+We list the available data used in the current version of CrossOver in the table below:
+
+| Dataset Name | Object Modality               | Scene Modality                      | Object Temporal Information | Scene Temporal Information
+| ------------ | ----------------------------- | ----------------------------------- |  -------------------------- | -------------------------- |
+| Scannet      | `[point, rgb, cad, referral]` | `[point, rgb, floorplan, referral]` |    ❌                       |          ✅                |
+| 3RScan       | `[point, rgb, referral]`      | `[point, rgb, referral]`            |    ✅                       |          ✅                |
+
+
+We detail data download + release required preprocessed data + meta-data and provide instructions for data download & preparation with scripts for ScanNet + 3RScan. 
+
+- For dataset download (data preparation, needed for single inference setup), please look at [README.MD](prepare_data/README.MD) in `data_prepare/` directory.
+- For preprocessed data download (training + evaluation only), download our released data by filling the form. details later in [Data Preprocessing](#wrench-data-preprocessing) Section.
+
+> You agree to the terms of ScanNet, 3RScan, ShapeNet, Scan2CAD and SceneVerse datasets by downloading our hosted data.
+
+### Generated Embedding Data
+We release the embeddings created with CrossOver on the datasets used (`embed_data`/ in GDrive), which can be used for cross-modal retrieval with a custom dataset.
+
+- `embed_scannet.pt`: Scene Embeddings For All Modalities (Point Cloud, RGB, Floorplan, Referral) in ScanNet
+- `embed_scan3r.pt` : Scene Embeddings For All Modalities (Point Cloud, RGB, Referral) in ScanNet
+
+File structure below:
+
+```json
+{
+  "scene": [{
+    "scan_id": "the ID of the scan",
+    "scene_embeds": {
+        "modality_name"     : "modality_embedding"
+      }
+    "mask" : "modality_name" : "True/False whether modality was present in the scan"
+    },
+    {
+      ...
+    },...
+  ]
+}
+```
+
+## :wrench: Data Preprocessing
+In order to process data faster during training + inference, we preprocess 1D (referral), 2D (RGB + floorplan) & 3D (Point Cloud + CAD) for both object instances and scenes. Note that, since for 3RScan dataset, they do not provide frame-wise RGB segmentations, we project the 3D data to 2D and store it in `.pt` format for every scan. We provide the scripts for projection and release the data. Here's an overview which data features are precomputed:
 
 - Object Instance: Referral, Multi-view RGB images, Point Cloud & CAD (only for ScanNet)
 - Scene: Referral, Multi-view RGB images, Floorplan (only for ScanNet) Point Cloud 
 
 We release the preprocessed & generated data on GDrive. We also provide the scripts which should be easily cusotmizable for new datasets. Further instructions below.
 
-## ScanNet
+### ScanNet
 Here we refer to the contents of the folder `processed_data/Scannet` on GDrive. The data structure is the following:
 
 ```
@@ -27,14 +72,14 @@ Scannet/
 |   └── ...
 ```
 
-### Running preprocessing scripts
+#### Running preprocessing scripts
 Adjust the path parameters of `Scannet` in the config files under `configs/preprocess` (remember to adjust the path of `Scannet:shape_dir` to ShapeNet directory). Run the following (after changing the `--config-path` in the bash file):
 
 ```bash
-bash scripts/preprocess/process_scannet.sh
+$ bash scripts/preprocess/process_scannet.sh
 ```
 
-## Scan3R
+### 3RScan
 Here we refer to the contents of the folder `processed_data/Scan3R` on GDrive. The data structure is the following:
 
 ```
@@ -55,14 +100,14 @@ Scan3R/
 |   └── ...
 ```
 
-### Running preprocessing scripts
+#### Running preprocessing scripts
 Adjust the path parameters of `Scan3R` in the config files under `configs/preprocess`. Run the following (after changing the `--config-path` in the bash file):
 
 ```bash
-bash scripts/preprocess/process_scan3r.sh
+$ bash scripts/preprocess/process_scan3r.sh
 ```
 
-Our script for Scan3R dataset performs the following additional processing:
+Our script for 3RScan dataset performs the following additional processing:
 
 - 3D-to-2D projection for 2D segmentation and stores as `gt-projection-seg.pt` for each scan.
-- DinoV2 feature computation for every image in every scan in the `val` split. (used only for comparison with SceneGraphLoc) - `computeAllImageFeaturesEachScan()` in `preprocess/feat2d/scan3r.py` 
+- DinoV2 feature computation for every image in every scan in the `val` split. (used only for comparison with SceneGraphLoc) - `computeAllImageFeaturesEachScan()` in [preprocess/feat2D/scan3r.py](preprocess/feat2D/scan3r.py).
