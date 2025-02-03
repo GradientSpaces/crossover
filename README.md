@@ -85,22 +85,22 @@ GPU: GeForce RTX 4090/RTX 3090
 Clone the repo and setup as follows:
 
 ```bash
-git clone git@github.com:GradientSpaces/CrossOver.git
-cd CrossOver
-conda env create -f req.yml
-conda activate crossover
+$ git clone git@github.com:GradientSpaces/CrossOver.git
+$ cd CrossOver
+$ conda env create -f req.yml
+$ conda activate crossover
 ```
 
 Further installation for `MinkowskiEngine` and `Pointnet2_PyTorch`. Setup as follows:
 
 ```bash
-git clone --recursive "https://github.com/EthenJ/MinkowskiEngine"
-conda install openblas-devel -c anaconda
-cd MinkowskiEngine/
-python setup.py install --blas_include_dirs=${CONDA_PREFIX}/include --force_cuda --blas=openblas
-cd ..
-git clone https://github.com/erikwijmans/Pointnet2_PyTorch.git
-pip install pointnet2_ops_lib/.
+$ git clone --recursive "https://github.com/EthenJ/MinkowskiEngine"
+$ conda install openblas-devel -c anaconda
+$ cd MinkowskiEngine/
+$ python setup.py install --blas_include_dirs=${CONDA_PREFIX}/include --force_cuda --blas=openblas
+$ cd ..
+$ git clone https://github.com/erikwijmans/Pointnet2_PyTorch.git
+$ pip install pointnet2_ops_lib/.
 ```
 
 > Since we use CUDA 12.1, we use the above `MinkowskiEngine` fork; for other CUDA drivers, please refer to the official [repo](https://github.com/NVIDIA/MinkowskiEngine).
@@ -117,10 +117,10 @@ See [DATA.MD](DATA.md) for detailed instructions on data download, preparation a
 > To run our demo, you only need to download generated embedding data; no need for downloading preprocessed data.
 
 # :film_projector: Demo
-This demo script allows users to process a custom scene and retrieve the closest match from ScanNet/3RScan using different modalities. Detailed usage can be found inside the script. Example usage below:
+This demo script allows users to process a custom scene and retrieve the closest match from the supported datasets using different modalities. Detailed usage can be found inside the script. Example usage below:
 
 ```bash
-python demo/demo_scene_retrieval.py
+$ python demo/demo_scene_retrieval.py
 ```
 
 Various configurable parameters:
@@ -133,7 +133,7 @@ Various configurable parameters:
 
 For pre-trained model download, refer to data download and checkpoints sections.
 
-> We also provide scripts for inference on a single scan Scannet/3RScan data. Details in [Single Inference](#shield-single-inference) section.
+> We also provide scripts for inference on a single scan of the supported datasets. Details in **Single Inference** section in [TRAIN.md](TRAIN.md).
 
 # :weight_lifting: Training and Inference 
 
